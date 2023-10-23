@@ -1,0 +1,5 @@
+{
+    "cortex-debug.openocdPath": "/home/creeper5820/.config/Code/User/globalStorage/bmd.stm32-for-vscode/@xpack-dev-tools/openocd/0.12.0-2.1/.content/bin/openocd",
+    "C_Cpp.default.configurationProvider": "cl.eide",
+    "C_Cpp.default.compilerPath": "/usr/bin/clang++-14"
+}
