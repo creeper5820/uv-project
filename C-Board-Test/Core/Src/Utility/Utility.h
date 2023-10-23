@@ -1,20 +1,11 @@
 #pragma once
 
 #include "string.h"
-
-/**
- * @brief Struction define
- */
-typedef struct {
-    int flag_turn;
-    int flag_slow;
-    int flag_stop;
-    int offset;
-} Data_OpenCV;
+#include "../Basic/Message_Type.hh"
 
 void Utility_Next(char **position_ptr)
 {
-    for (; **position_ptr != '-'; (*position_ptr)++)
+    for (; **position_ptr != '_'; (*position_ptr)++)
         ;
 
     (*position_ptr)++;
@@ -40,4 +31,8 @@ void Utility_Get_Data_OpenCV(char *data, Data_OpenCV *data_opencv)
 
     Utility_Next(&position);
     data_opencv->offset = Utility_Get_Integer(position);
+}
+
+void Utility_Get_Factor_System(char *data, Factor_System *factor_system)
+{
 }

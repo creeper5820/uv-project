@@ -9,10 +9,21 @@ void Motion_Loop();
 
 void Motion_Loop()
 {
-    /* USER CODE BEGIN StartDefaultTask */
-    /* Infinite loop */
+
+    /**
+     * @brief The goal this controller would touch
+     */
+
+    float speed     = 0; // -1.0 < speed < 1.0
+    float direction = 0; // -1.0 < direcrion < 1.0
+
     for (;;) {
-        osDelay(1);
+        // receive message from queue
+
+        // handle the message and modify the goal
+
+        // use controller and pid to achieve this goal
+
+        osDelay(1000);
     }
-    /* USER CODE END StartDefaultTask */
 }

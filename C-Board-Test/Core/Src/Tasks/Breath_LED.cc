@@ -1,42 +1,46 @@
-#include "main.h"
 #include "cmsis_os.h"
+#include "../../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h"
+
+#include "main.h"
 #include "tim.h"
 #include "gpio.h"
 
-#include "../Controller/LED_Controller.hh"
+#include "../Application/Led_Controller.hh"
+#include "../Basic/Message_Type.hh"
 
 extern "C" {
 void Breath_LED_Loop();
 }
 
-int status_breath = 1;
+uint8_t status_breath = 0;
 
 LED_Struct LED_1 = {&htim5, TIM_CHANNEL_1};
 LED_Struct LED_2 = {&htim5, TIM_CHANNEL_2};
 LED_Struct LED_3 = {&htim5, TIM_CHANNEL_3};
 
+auto rgb = RGB_Controller(LED_1, LED_2, LED_3);
+extern QueueHandle_t Breath_Queue;
+
 void Breath_LED_Loop()
 {
-    /* USER CODE BEGIN Breath_LED_Fun */
-    int time_delay = 20;
-    /* Infinite loop */
     for (;;) {
-        if (status_breath == 0)
-            break;
 
-        for (float count = 0; count < 1; count += 0.01) {
-            osDelay(time_delay);
-            Set_LED(LED_1, count);
-            Set_LED(LED_2, count);
-            Set_LED(LED_3, count);
-        }
+        xQueueReceive(Breath_Queue, &status_breath, 0);
 
-        for (float count = 1; count > 0; count -= 0.01) {
-            osDelay(time_delay);
-            Set_LED(LED_1, count);
-            Set_LED(LED_2, count);
-            Set_LED(LED_3, count);
+        switch (status_breath) {
+            case 1: {
+                rgb.Set_Color(1.0, 1.0, 1.0);
+                break;
+            }
+
+            case 0: {
+                rgb.Set_Color(0.3, 0.7, 0.1);
+                break;
+            }
+
+            default: {
+                break;
+            }
         }
     }
-    /* USER CODE END Breath_LED_Fun */
 }

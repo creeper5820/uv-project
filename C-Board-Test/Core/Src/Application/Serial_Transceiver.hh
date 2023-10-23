@@ -4,10 +4,6 @@
 #include "usart.h"
 #include "string"
 
-typedef struct {
-
-} Factor_System;
-
 enum Status {
     WAIT,
     OK,

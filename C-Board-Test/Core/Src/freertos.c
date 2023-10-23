@@ -59,28 +59,35 @@ osThreadId_t Breath_LEDHandle;
 const osThreadAttr_t Breath_LED_attributes = {
   .name = "Breath_LED",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for Messager */
 osThreadId_t MessagerHandle;
 const osThreadAttr_t Messager_attributes = {
   .name = "Messager",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
+  .priority = (osPriority_t) osPriorityHigh,
 };
 /* Definitions for Motion */
 osThreadId_t MotionHandle;
 const osThreadAttr_t Motion_attributes = {
   .name = "Motion",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for Light */
 osThreadId_t LightHandle;
 const osThreadAttr_t Light_attributes = {
   .name = "Light",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityLow,
+  .priority = (osPriority_t) osPriorityNormal,
+};
+/* Definitions for Tof */
+osThreadId_t TofHandle;
+const osThreadAttr_t Tof_attributes = {
+  .name = "Tof",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityRealtime,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -93,6 +100,7 @@ extern void Breath_LED_Loop(void *argument);
 extern void Messager_Loop(void *argument);
 extern void Motion_Loop(void *argument);
 extern void Light_Loop(void *argument);
+extern void Tof_Loop(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -137,6 +145,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Light */
   LightHandle = osThreadNew(Light_Loop, NULL, &Light_attributes);
+
+  /* creation of Tof */
+  TofHandle = osThreadNew(Tof_Loop, NULL, &Tof_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
     /* add threads, ... */
