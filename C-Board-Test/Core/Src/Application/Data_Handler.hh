@@ -8,7 +8,6 @@ class Data_Handler
 public:
     Data_OpenCV data_opencv_;
     Data_Tof data_tof_;
-
     Control_System system_;
 
 public:
@@ -38,9 +37,15 @@ public:
 
     void Led_Handle(Control_Led *led)
     {
-        led->G = 1.0;
-        led->R = 1.0;
-        led->B = 1.0;
+        if (data_opencv_.flag_turn == 1) {
+            led->G = 1.0;
+            led->R = 1.0;
+            led->B = 1.0;
+        } else {
+            led->R = 1.0;
+            led->G = 0.2;
+            led->B = 0.4;
+        }
     }
 
     void System_Handle(Control_System *system)

@@ -12,7 +12,7 @@ extern "C" {
 void Breath_LED_Loop();
 }
 
-extern QueueHandle_t Breath_Queue;
+extern QueueHandle_t Queue_Breath;
 
 void Breath_LED_Loop()
 {
@@ -23,7 +23,7 @@ void Breath_LED_Loop()
         {&htim5, TIM_CHANNEL_1});
 
     for (;;) {
-        xQueueReceive(Breath_Queue, &led, portMAX_DELAY);
+        xQueueReceive(Queue_Breath, &led, portMAX_DELAY);
 
         rgb.Set_Color(
             led.R,

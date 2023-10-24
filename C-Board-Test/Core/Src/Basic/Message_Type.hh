@@ -51,6 +51,7 @@ struct Control_Light {
  */
 struct Control_System {
 };
+
 /**
  * @param R
  * @param G
