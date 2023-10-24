@@ -1,8 +1,8 @@
 #include "Motor.h"
 
 /**************************************************
- * 函数功能：电机初始化
- 30000Hz  arr 1000
+ * @brief 电机初始化
+ * 30000Hz  arr 1000
  */
 void Motor_Init()
 {
@@ -11,9 +11,9 @@ void Motor_Init()
 }
 
 /**************************************************
- * 函数功能：电机控制
- * 参数：motor_left：PWM的值，还可继续封装
- 30000Hz  arr 1000
+ * @brief 电机控制
+ * @param motor_left：PWM的值，还可继续封装
+ * 30000Hz  arr 1000
  */
 void Set_Pwm(int motor_left, int motor_right) // 输出PWM大小
 {
