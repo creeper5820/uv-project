@@ -1,9 +1,5 @@
 #include "cmsis_os.h"
-#include "../../Middlewares/Third_Party/FreeRTOS/Source/include/queue.h"
-
-#include "tim.h"
-#include "gpio.h"
-#include "main.h"
+#include "queue.h"
 
 #include "../Application/Serial_Transceiver.hh"
 #include "../Application/Data_Handler.hh"
@@ -22,11 +18,11 @@ enum Model {
     MODEL_DEBUG
 };
 
-uint8_t model = MODEL_NORMAL;
+static uint8_t model = MODEL_NORMAL;
 
-void Model_Normal();
-void Model_Debug();
-void Model_Cruise();
+static void Model_Normal();
+static void Model_Debug();
+static void Model_Cruise();
 
 // Queue to use
 auto Queue_Breath = xQueueCreate(3, sizeof(Control_Led));
@@ -39,6 +35,7 @@ auto Queue_Tof    = xQueueCreate(3, sizeof(float));
 static auto Lisii        = Serial_Transceiver(&huart1);
 static auto data_handler = Data_Handler();
 
+// Message caches
 static char data[25];
 static float value_tof;
 static Control_Led control_led;
@@ -67,15 +64,8 @@ void Messager_Loop()
     }
 }
 
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
-{
-    if (huart == &huart1) {
-        Lisii.Set_Ok();
-    }
-}
-
 // Loop function in the Normal Model
-void Model_Normal()
+static void Model_Normal()
 {
     Lisii.Recevice((uint8_t *)data, sizeof(data));
 
@@ -102,13 +92,39 @@ void Model_Normal()
 }
 
 // Loop function in the Debug Model
-void Model_Debug()
+static void Model_Debug()
 {
+    Lisii.Recevice((uint8_t *)data, sizeof(data));
+
+    if (Lisii.Get_Status() == OK) {
+        Lisii.Send((uint8_t *)&"Receive OK\n", 11);
+        Lisii.Recevice((uint8_t *)data, 11);
+        Lisii.Set_Wait();
+        data_handler.Load_Serial(data);
+    }
+
+    data_handler.Led_Handle(&control_led);
+    data_handler.Motion_Handle(&control_motion);
+    data_handler.Light_Handle(&control_light);
+    data_handler.System_Handle(&control_system);
+
+    xQueueSend(Queue_Breath, &control_led, 0);
+    xQueueSend(Queue_Motion, &control_motion, 0);
+    xQueueSend(Queue_Light, &control_light, 0);
+    xQueueSend(Queue_System, &control_system, 0);
+
     osDelay(10);
 }
 
 // Loop function in the Cruise Model
-void Model_Cruise()
+static void Model_Cruise()
 {
     osDelay(10);
+}
+
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+{
+    if (huart == &huart1) {
+        Lisii.Set_Ok();
+    }
 }

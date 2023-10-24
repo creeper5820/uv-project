@@ -2,18 +2,16 @@
 #include "cmsis_os.h"
 #include "tim.h"
 #include "gpio.h"
+#include "queue.h"
 
 extern "C" {
 void Motion_Loop();
 }
 
+extern QueueHandle_t Queue_Motion;
+
 void Motion_Loop()
 {
-
-    /**
-     * @brief The goal this controller would touch
-     */
-
     float speed     = 0; // -1.0 < speed < 1.0
     float direction = 0; // -1.0 < direcrion < 1.0
 
