@@ -48,7 +48,10 @@
             "ostream": "cpp",
             "stdexcept": "cpp",
             "streambuf": "cpp",
-            "typeinfo": "cpp"
+            "typeinfo": "cpp",
+            "cmsis_os.h": "c",
+            "freertos.h": "c",
+            "reent.h": "c"
         }
     },
     "extensions": {}

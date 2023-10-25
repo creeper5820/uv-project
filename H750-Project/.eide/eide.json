@@ -15,9 +15,9 @@
   },
   "outDir": "build",
   "deviceName": null,
-  "packDir": ".pack/Keil/STM32H7xx_DFP.3.0.0",
+  "packDir": null,
   "miscInfo": {
-    "uid": "7d08c8b2cce8fb2a8c0b5aed192f1b19"
+    "uid": "b4f5878f97c9cd16aa621d9fd97c7f25"
   },
   "targets": {
     "Debug": {
@@ -46,25 +46,7 @@
         "speed": 8000,
         "otherCmds": ""
       },
-      "uploadConfigMap": {
-        "JLink": {
-          "bin": "",
-          "baseAddr": "",
-          "cpuInfo": {
-            "vendor": "null",
-            "cpuName": "null"
-          },
-          "proType": 1,
-          "speed": 8000,
-          "otherCmds": ""
-        },
-        "OpenOCD": {
-          "bin": "",
-          "target": "stm32h7x",
-          "interface": "cmsis-dap-v1",
-          "baseAddr": "0x08000000"
-        }
-      },
+      "uploadConfigMap": {},
       "custom_dep": {
         "name": "default",
         "incList": [

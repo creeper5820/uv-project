@@ -40,6 +40,11 @@ public:
         return status;
     }
 
+    UART_HandleTypeDef *Get_Uart_Type()
+    {
+        return huart_ptr_;
+    }
+
     /**
      * @brief Some function to set value of this
      */

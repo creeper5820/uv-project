@@ -3,38 +3,80 @@
 #include "main.h"
 #include "../Basic/Message_Type.hh"
 
-class RGB_Controller
+/**
+ * @brief Class to control a led by setting gpio high and low
+ */
+class Led_Controller
 {
 private:
-    LED_Struct LED_R_;
-    LED_Struct LED_G_;
-    LED_Struct LED_B_;
-
-    float brightness_R;
-    float brightness_G;
-    float brightness_B;
+    GPIO_TypeDef *type_;
+    uint16_t pin_;
 
 public:
-    RGB_Controller(LED_Struct LED_R, LED_Struct LED_G, LED_Struct LED_B)
-        : LED_R_(LED_R),
-          LED_G_(LED_G),
-          LED_B_(LED_B)
+    Led_Controller()
     {
-        brightness_R = 0;
-        brightness_G = 0;
-        brightness_B = 0;
     }
 
-    void Set_LED(LED_Struct led, float brightness)
+    Led_Controller(GPIO_TypeDef *type, uint16_t pin)
+        : type_(type),
+          pin_(pin)
     {
-        uint32_t value = (float)led.htim->Init.Period * brightness;
-        __HAL_TIM_SET_COMPARE(led.htim, led.Channel, value);
     }
 
-    void Set_Color(float R, float G, float B)
+    void Light()
     {
-        Set_LED(LED_R_, R);
-        Set_LED(LED_G_, G);
-        Set_LED(LED_B_, B);
+        HAL_GPIO_WritePin(type_, pin_, GPIO_PIN_RESET);
+    }
+
+    void Dark()
+    {
+        HAL_GPIO_WritePin(type_, pin_, GPIO_PIN_SET);
+    }
+};
+
+/**
+ * @brief A group of led
+ */
+class Led_Group
+{
+private:
+    Led_Controller leds_[4];
+    int size_;
+
+public:
+    Led_Group()
+        : size_(0)
+    {
+    }
+
+    void Add(Led_Controller led)
+    {
+        if (size_ > 3)
+            return;
+
+        leds_[size_] = led;
+        size_++;
+    }
+
+    void Light_Single(int number)
+    {
+        if (number > size_)
+            return;
+
+        for (int i = 0; i < size_; i++)
+            leds_[i].Dark();
+
+        leds_[number].Light();
+    }
+
+    void Set(Control_Led control_led)
+    {
+        for (int i = 0; i < 4; i++) {
+
+            if (control_led.light[i])
+                leds_[i].Light();
+            else
+                leds_[i].Dark();
+        }
     }
 };

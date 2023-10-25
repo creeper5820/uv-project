@@ -25,14 +25,14 @@ static void Model_Debug();
 static void Model_Cruise();
 
 // Queue to use
-auto Queue_Breath = xQueueCreate(3, sizeof(Control_Led));
-auto Queue_Motion = xQueueCreate(3, sizeof(Control_Motion));
-auto Queue_Light  = xQueueCreate(3, sizeof(Control_Light));
-auto Queue_System = xQueueCreate(3, sizeof(Control_System));
-auto Queue_Tof    = xQueueCreate(3, sizeof(float));
+auto Queue_Breath = xQueueCreate(2, sizeof(Control_Led));
+auto Queue_Motion = xQueueCreate(2, sizeof(Control_Motion));
+auto Queue_Light  = xQueueCreate(2, sizeof(Control_Light));
+auto Queue_System = xQueueCreate(2, sizeof(Control_System));
+auto Queue_Tof    = xQueueCreate(2, sizeof(float));
 
 // Applications to use
-static auto Lisii        = Serial_Transceiver(&huart3);
+static auto Lisii        = Serial_Transceiver(&huart1);
 static auto data_handler = Data_Handler();
 
 // Message caches
@@ -43,7 +43,9 @@ static Control_Motion control_motion;
 static Control_Light control_light;
 static Control_System control_system;
 
-// Task
+/******************************************
+ * @brief Loop function of the task
+ */
 void Messager_Loop()
 {
     for (;;) {
@@ -61,10 +63,14 @@ void Messager_Loop()
                 Model_Cruise();
                 break;
         }
+
+        osDelay(100);
     }
 }
 
-// Loop function in the Normal Model
+/******************************************
+ * @brief Loop function in the Normal Model
+ */
 static void Model_Normal()
 {
     Lisii.Recevice((uint8_t *)data, sizeof(data));
@@ -87,13 +93,11 @@ static void Model_Normal()
     xQueueSend(Queue_Motion, &control_motion, 0);
     xQueueSend(Queue_Light, &control_light, 0);
     xQueueSend(Queue_System, &control_system, 0);
-
-        Lisii.Send((uint8_t *)&"Hello World\n", 12);
-
-    osDelay(10);
 }
 
-// Loop function in the Debug Model
+/*****************************************
+ * @brief Loop function in the Debug Model
+ */
 static void Model_Debug()
 {
     Lisii.Recevice((uint8_t *)data, sizeof(data));
@@ -114,19 +118,18 @@ static void Model_Debug()
     xQueueSend(Queue_Motion, &control_motion, 0);
     xQueueSend(Queue_Light, &control_light, 0);
     xQueueSend(Queue_System, &control_system, 0);
-
-    osDelay(10);
 }
 
-// Loop function in the Cruise Model
+/******************************************
+ * @brief Loop function in the Cruise Model
+ */
 static void Model_Cruise()
 {
-    osDelay(10);
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-    if (huart == &huart1) {
+    if (huart == Lisii.Get_Uart_Type()) {
         Lisii.Set_Ok();
     }
 }

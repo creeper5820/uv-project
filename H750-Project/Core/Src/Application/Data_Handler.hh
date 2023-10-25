@@ -37,15 +37,18 @@ public:
 
     void Led_Handle(Control_Led *led)
     {
-        if (data_opencv_.flag_turn == 1) {
-            led->G = 1.0;
-            led->R = 1.0;
-            led->B = 1.0;
-        } else {
-            led->R = 1.0;
-            led->G = 0.2;
-            led->B = 0.4;
-        }
+        auto control = Control_Led{1, 0, 0, 0};
+
+        if (data_opencv_.flag_turn == 1)
+            control.light[1] = 1;
+
+        if (data_opencv_.flag_slow == 1)
+            control.light[2] = 1;
+
+        if (data_opencv_.flag_stop == 1)
+            control.light[3] = 1;
+
+        *led = control;
     }
 
     void System_Handle(Control_System *system)

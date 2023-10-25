@@ -3,11 +3,6 @@
 #include "main.h"
 #include "tim.h"
 
-typedef struct LED_Struct {
-    TIM_HandleTypeDef *htim;
-    uint32_t Channel;
-} LED_Struct;
-
 /**
  * @param flag_turn when to turn
  * @param flag_slow when to slow down
@@ -55,15 +50,8 @@ struct Control_System {
     float Kd;
 };
 
-/**
- * @param R
- * @param G
- * @param B
- */
 struct Control_Led {
-    float R;
-    float G;
-    float B;
+    bool light[4];
 };
 
 typedef struct Data_OpenCV Data_OpenCV;
@@ -73,5 +61,3 @@ typedef struct Control_System Control_System;
 typedef struct Control_Motion Control_Motion;
 typedef struct Control_Light Control_Light;
 typedef struct Control_Led Control_Led;
-
-typedef struct LED_Struct LED_Struct;

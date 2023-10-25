@@ -12,8 +12,8 @@ int64_t encoderSum = 0;
  */
 void Encoder_Init(TIM_HandleTypeDef *htim_1, TIM_HandleTypeDef *htim_2)
 {
-    HAL_TIM_Encoder_Start(&htim_1, TIM_CHANNEL_ALL);
-    HAL_TIM_Encoder_Start(&htim_2, TIM_CHANNEL_ALL);
+    HAL_TIM_Encoder_Start(htim_1, TIM_CHANNEL_ALL);
+    HAL_TIM_Encoder_Start(htim_2, TIM_CHANNEL_ALL);
 }
 
 /**************************************************
