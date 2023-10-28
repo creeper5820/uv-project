@@ -29,9 +29,6 @@ void Utility_Get_Data_OpenCV(char *data, Data_OpenCV *data_opencv)
 
     Utility_Next(&position);
     data_opencv->flag_stop = Utility_Get_Integer(position);
-
-    Utility_Next(&position);
-    data_opencv->offset = Utility_Get_Integer(position);
 }
 
 void Utility_Get_Data_System(char *data, Control_System *system)

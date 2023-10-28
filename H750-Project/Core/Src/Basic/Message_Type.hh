@@ -3,61 +3,72 @@
 #include "main.h"
 #include "tim.h"
 
-/**
+/*******************************
  * @param flag_turn when to turn
  * @param flag_slow when to slow down
  * @param flag_stop when to stop
  * @param offset how much uv turn to keep moving along the straight line
  */
+typedef struct Data_OpenCV Data_OpenCV;
 struct Data_OpenCV {
     int flag_turn;
     int flag_slow;
     int flag_stop;
-    int offset;
 };
 
-/**
+/*****************
  * @param distance
  */
+typedef struct Data_Tof Data_Tof;
 struct Data_Tof {
-    float distance;
+    int distance;
 };
 
-/**
- * @brief Value to control motion
+/*****************
+ * @param factor_k
+ * @param factor_i
+ * @param factor_p
+ * @param factor_encode
  */
+typedef struct Control_System Control_System;
+struct Control_System {
+    float factor_p;
+    float factor_i;
+    float factor_d;
+    float factor_encode;
+    bool model_pid;
+};
+
+/********************************
+ * @brief Value to control motion
+ * @param speed
+ * @param direction
+ */
+typedef struct Control_Motion Control_Motion;
 struct Control_Motion {
     float speed;
     float direction;
 };
 
-/**
+/*******************************
  * @brief Value to control light
  */
+typedef struct Control_Light Control_Light;
 struct Control_Light {
-    float speed;
-    float direction;
+    int status;
 };
 
-/**
- * @param Factor_K
- * @param Factor_I
- * @param Factor_P
- */
-struct Control_System {
-    float Kp;
-    float Ki;
-    float Kd;
-};
-
+typedef struct Control_Led Control_Led;
 struct Control_Led {
     bool light[4];
 };
 
-typedef struct Data_OpenCV Data_OpenCV;
-typedef struct Data_Tof Data_Tof;
-
-typedef struct Control_System Control_System;
-typedef struct Control_Motion Control_Motion;
-typedef struct Control_Light Control_Light;
-typedef struct Control_Led Control_Led;
+enum Status_Light {
+    LIGHT_ALL,
+    DARK_ALL,
+    LIGHT_LEFT,
+    LIGHT_RIGHT,
+    LIGHT_HEAD,
+    LIGHT_TAIL,
+    FLASH_ALL,
+};

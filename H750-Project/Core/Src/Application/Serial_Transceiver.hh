@@ -21,14 +21,19 @@ public:
     {
     }
 
-    void Send(uint8_t *pdata, uint16_t size)
+    void Send(char *pdata, uint16_t size)
     {
-        HAL_UART_Transmit_DMA(huart_ptr_, pdata, size);
+        HAL_UART_Transmit_DMA(huart_ptr_, (uint8_t *)pdata, size);
     }
 
-    void Recevice(uint8_t *pdata, uint16_t size)
+    void Recevice_A(uint8_t *pdata, uint16_t size)
     {
         HAL_UARTEx_ReceiveToIdle_DMA(huart_ptr_, pdata, size);
+    }
+
+    void Recevice_B(uint8_t *pdata, uint16_t size)
+    {
+        HAL_UART_Receive_DMA(huart_ptr_, pdata, size);
     }
 
     /**

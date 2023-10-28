@@ -3,7 +3,7 @@
 #include "main.h"
 #include "../Basic/Message_Type.hh"
 
-/**
+/************************************************************
  * @brief Class to control a led by setting gpio high and low
  */
 class Led_Controller
@@ -34,7 +34,7 @@ public:
     }
 };
 
-/**
+/***********************
  * @brief A group of led
  */
 class Led_Group

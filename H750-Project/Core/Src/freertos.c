@@ -80,13 +80,6 @@ osThreadId_t TofHandle;
 const osThreadAttr_t Tof_attributes = {
   .name = "Tof",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityRealtime,
-};
-/* Definitions for Breath_LED */
-osThreadId_t Breath_LEDHandle;
-const osThreadAttr_t Breath_LED_attributes = {
-  .name = "Breath_LED",
-  .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
 
@@ -100,7 +93,6 @@ extern void Messager_Loop(void *argument);
 extern void Motion_Loop(void *argument);
 extern void Light_Loop(void *argument);
 extern void Tof_Loop(void *argument);
-extern void Breath_LED_Loop(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -145,9 +137,6 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Tof */
   TofHandle = osThreadNew(Tof_Loop, NULL, &Tof_attributes);
-
-  /* creation of Breath_LED */
-  Breath_LEDHandle = osThreadNew(Breath_LED_Loop, NULL, &Breath_LED_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

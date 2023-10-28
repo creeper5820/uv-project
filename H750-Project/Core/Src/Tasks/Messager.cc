@@ -1,135 +1,87 @@
-#include "cmsis_os.h"
-#include "queue.h"
-
-#include "../Application/Serial_Transceiver.hh"
-#include "../Application/Data_Handler.hh"
-#include "../Basic/Message_Type.hh"
-
-// Override the function
-extern "C" {
-void Messager_Loop();
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
-}
-
-// The Model and function
-enum Model {
-    MODEL_NORMAL,
-    MODEL_CRUISE,
-    MODEL_DEBUG
-};
-
-static uint8_t model = MODEL_NORMAL;
-
-static void Model_Normal();
-static void Model_Debug();
-static void Model_Cruise();
-
-// Queue to use
-auto Queue_Breath = xQueueCreate(2, sizeof(Control_Led));
-auto Queue_Motion = xQueueCreate(2, sizeof(Control_Motion));
-auto Queue_Light  = xQueueCreate(2, sizeof(Control_Light));
-auto Queue_System = xQueueCreate(2, sizeof(Control_System));
-auto Queue_Tof    = xQueueCreate(2, sizeof(float));
-
-// Applications to use
-static auto Lisii        = Serial_Transceiver(&huart1);
-static auto data_handler = Data_Handler();
-
-// Message caches
-static char data[25];
-static float value_tof;
-static Control_Led control_led;
-static Control_Motion control_motion;
-static Control_Light control_light;
-static Control_System control_system;
+#include "Messager.hh"
 
 /******************************************
  * @brief Loop function of the task
  */
 void Messager_Loop()
 {
+    Begin();
+
     for (;;) {
 
         switch (model) {
-            case MODEL_NORMAL:
-                Model_Normal();
-                break;
-
             case MODEL_DEBUG:
                 Model_Debug();
                 break;
 
-            case MODEL_CRUISE:
-                Model_Cruise();
+            case TASK_A:
+                Task_A();
+                break;
+
+            case TASK_B:
+                Task_B();
+                break;
+
+            case TASK_C:
+                Task_C();
                 break;
         }
-
-        osDelay(100);
     }
+
+    while (1)
+        ;
+}
+
+void Begin()
+{
+    Control_Light control_light = {FLASH_ALL};
+    xQueueSend(Queue_Light, &control_light, 50);
+
+    while (lisii.Get_Status() == OK)
+        ;
 }
 
 /******************************************
- * @brief Loop function in the Normal Model
+ * @brief Function of the task a
  */
-static void Model_Normal()
+void Task_A()
 {
-    Lisii.Recevice((uint8_t *)data, sizeof(data));
-
-    if (Lisii.Get_Status() == OK) {
-        Lisii.Send((uint8_t *)&"Receive OK\n", 11);
-        Lisii.Recevice((uint8_t *)data, 11);
-        Lisii.Set_Wait();
-        data_handler.Load_Serial(data);
-    }
-    if (xQueueReceive(Queue_Tof, &value_tof, 0) == pdPASS)
-        data_handler.Load_Tof(value_tof);
-
-    data_handler.Led_Handle(&control_led);
-    data_handler.Motion_Handle(&control_motion);
-    data_handler.Light_Handle(&control_light);
-    data_handler.System_Handle(&control_system);
-
-    xQueueSend(Queue_Breath, &control_led, 0);
-    xQueueSend(Queue_Motion, &control_motion, 0);
-    xQueueSend(Queue_Light, &control_light, 0);
-    xQueueSend(Queue_System, &control_system, 0);
-}
-
-/*****************************************
- * @brief Loop function in the Debug Model
- */
-static void Model_Debug()
-{
-    Lisii.Recevice((uint8_t *)data, sizeof(data));
-
-    if (Lisii.Get_Status() == OK) {
-        Lisii.Send((uint8_t *)&"Receive OK\n", 11);
-        Lisii.Recevice((uint8_t *)data, 11);
-        Lisii.Set_Wait();
-        data_handler.Load_Serial(data);
-    }
-
-    data_handler.Led_Handle(&control_led);
-    data_handler.Motion_Handle(&control_motion);
-    data_handler.Light_Handle(&control_light);
-    data_handler.System_Handle(&control_system);
-
-    xQueueSend(Queue_Breath, &control_led, 0);
-    xQueueSend(Queue_Motion, &control_motion, 0);
-    xQueueSend(Queue_Light, &control_light, 0);
-    xQueueSend(Queue_System, &control_system, 0);
 }
 
 /******************************************
- * @brief Loop function in the Cruise Model
+ * @brief Function of the task b
  */
-static void Model_Cruise()
+void Task_B()
 {
+}
+
+/******************************************
+ * @brief Function of the task b
+ */
+void Task_C()
+{
+}
+
+/******************************************
+ * @brief Function of the debug
+ */
+void Model_Debug()
+{
+    lisii.Recevice_A((uint8_t *)data, sizeof(data));
+
+    if (lisii.Get_Status() == OK) {
+        lisii.Set_Ok();
+        lisii.Send((char *)"OK\n", 3);
+        osDelay(50);
+    }
+
+    osDelay(50);
 }
 
 void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
 {
-    if (huart == Lisii.Get_Uart_Type()) {
-        Lisii.Set_Ok();
+    if (huart == lisii.Get_Uart_Type()) {
+        lisii.Recevice_A((uint8_t *)data, Size);
+        lisii.Send((char *)"Lisii OK\n", 9);
     }
 }

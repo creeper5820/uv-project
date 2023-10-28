@@ -7,8 +7,8 @@
 extern "C" {
 #endif
 
-void Servo_Init(TIM_HandleTypeDef *htim);
-void Servo_Control(TIM_HandleTypeDef *htim, uint16_t duty);
+void Servo_Init();
+void Servo_Control(uint16_t duty);
 
 #ifdef __cplusplus
 }
