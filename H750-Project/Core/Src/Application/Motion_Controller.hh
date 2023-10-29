@@ -1,5 +1,7 @@
 #pragma once
 
+#include "cmsis_os.h"
+
 #include "../Basic/Motor.h"
 #include "../Basic/Servo.h"
 #include "../Basic/Encode.h"
@@ -11,11 +13,10 @@ public:
     Control_System system_;
 
     // PID params of speed
-    float speed_last_     = 0;
-    float bias_           = 0;
-    float bias_last_      = 0;
-    float bias_last_last_ = 0;
-    float pwm_            = 0;
+    float speed_last_ = 0;
+    float bias_       = 0;
+    float bias_last_  = 0;
+    float pwm_        = 0;
 
     // PID params if direction
     float direction_last_ = 0;
@@ -95,13 +96,12 @@ public:
             int pwm_add =
                 system_.factor_p * (bias_ - bias_last_) +
                 system_.factor_i * bias_ +
-                system_.factor_d * (bias_ - 2 * bias_last_ + bias_last_last_);
+                system_.factor_d * (bias_ - bias_last_);
 
             pwm_ += pwm_add;
 
-            speed_last_     = Read_Speed();
-            bias_last_      = bias_;
-            bias_last_last_ = bias_last_;
+            speed_last_ = Read_Speed();
+            bias_last_  = bias_;
 
         } else {
 

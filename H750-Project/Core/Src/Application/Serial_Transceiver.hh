@@ -2,7 +2,7 @@
 
 #include "dma.h"
 #include "usart.h"
-#include "string"
+#include "cmsis_os.h"
 
 enum Status {
     WAIT,
@@ -13,7 +13,9 @@ class Serial_Transceiver
 {
 private:
     UART_HandleTypeDef *huart_ptr_;
-    int status = WAIT;
+    char data_[30];
+    int size_;
+    int status_ = WAIT;
 
 public:
     Serial_Transceiver(UART_HandleTypeDef *huart_ptr)
@@ -24,16 +26,17 @@ public:
     void Send(char *pdata, uint16_t size)
     {
         HAL_UART_Transmit_DMA(huart_ptr_, (uint8_t *)pdata, size);
+        osDelay(5);
     }
 
-    void Recevice_A(uint8_t *pdata, uint16_t size)
+    void Recevice_A()
     {
-        HAL_UARTEx_ReceiveToIdle_DMA(huart_ptr_, pdata, size);
+        HAL_UARTEx_ReceiveToIdle_DMA(huart_ptr_, (uint8_t *)data_, sizeof(data_));
     }
 
-    void Recevice_B(uint8_t *pdata, uint16_t size)
+    void Recevice_B()
     {
-        HAL_UART_Receive_DMA(huart_ptr_, pdata, size);
+        HAL_UART_Receive_DMA(huart_ptr_, (uint8_t *)data_, sizeof(data_));
     }
 
     /**
@@ -42,12 +45,27 @@ public:
 
     int Get_Status()
     {
-        return status;
+        return status_;
     }
 
     UART_HandleTypeDef *Get_Uart_Type()
     {
         return huart_ptr_;
+    }
+
+    char *Get_Data()
+    {
+        return data_;
+    }
+
+    int Get_Data_Size()
+    {
+        return size_;
+    }
+
+    char Get_Data_Type()
+    {
+        return data_[0];
     }
 
     /**
@@ -56,12 +74,17 @@ public:
 
     void Set_Wait()
     {
-        status = WAIT;
+        status_ = WAIT;
     }
 
     void Set_Ok()
     {
-        status = OK;
+        status_ = OK;
+    }
+
+    void Set_Size(int size)
+    {
+        size_ = size;
     }
 
     void Hello_World()

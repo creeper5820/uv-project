@@ -1,19 +1,4 @@
-#include "cmsis_os.h"
-#include "queue.h"
-#include "../Application/Led_Controller.hh"
-#include "../Basic/Message_Type.hh"
-
-extern "C" {
-void Light_Loop();
-}
-
-extern QueueHandle_t Queue_Light;
-
-auto leds          = Led_Group();
-auto control_light = Control_Light{};
-
-void Wait_Start();
-void Wait_Tof();
+#include "Light.hh"
 
 void Light_Loop()
 {
@@ -27,27 +12,51 @@ void Light_Loop()
 
         switch (control_light.status) {
             case LIGHT_ALL:
+                Light_All();
                 break;
 
             case DARK_ALL:
+                Dark_All();
                 break;
 
             case LIGHT_LEFT:
+                Light_Left();
                 break;
 
             case LIGHT_RIGHT:
+                Light_Right();
                 break;
 
             case LIGHT_HEAD:
+                Light_Head();
                 break;
 
             case LIGHT_TAIL:
+                Light_Tail();
                 break;
 
             case FLASH_ALL:
+                Flash_All();
                 break;
 
             default:
+                break;
+        }
+
+        switch (control_light.task) {
+            case PREPARE:
+                break;
+            case MODEL_DEBUG:
+                leds.Light_Single(0);
+                break;
+            case TASK_A:
+                leds.Light_Single(1);
+                break;
+            case TASK_B:
+                leds.Light_Single(2);
+                break;
+            case TASK_C:
+                leds.Light_Single(3);
                 break;
         }
     }
@@ -72,4 +81,43 @@ void Wait_Tof()
     osDelay(300);
     leds.Set({0, 0, 0, 0});
     osDelay(300);
+}
+
+void Light_All()
+{
+    leds.Set({1, 1, 1, 1});
+}
+
+void Dark_All()
+{
+    leds.Set({0, 0, 0, 0});
+}
+
+void Flash_All()
+{
+    for (int i = 0; i < 4; i++) {
+        leds.Light_Single(i);
+        osDelay(100);
+    }
+
+    for (int i = 0; i < 4; i++) {
+        leds.Light_Single(3 - i);
+        osDelay(100);
+    }
+}
+
+void Light_Left()
+{
+}
+
+void Light_Right()
+{
+}
+
+void Light_Head()
+{
+}
+
+void Light_Tail()
+{
 }

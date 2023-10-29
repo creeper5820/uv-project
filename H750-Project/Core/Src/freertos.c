@@ -82,6 +82,13 @@ const osThreadAttr_t Tof_attributes = {
   .stack_size = 128 * 4,
   .priority = (osPriority_t) osPriorityNormal,
 };
+/* Definitions for Lisii */
+osThreadId_t LisiiHandle;
+const osThreadAttr_t Lisii_attributes = {
+  .name = "Lisii",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal,
+};
 
 /* Private function prototypes -----------------------------------------------*/
 /* USER CODE BEGIN FunctionPrototypes */
@@ -93,6 +100,7 @@ extern void Messager_Loop(void *argument);
 extern void Motion_Loop(void *argument);
 extern void Light_Loop(void *argument);
 extern void Tof_Loop(void *argument);
+extern void Lisii_Loop(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -137,6 +145,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Tof */
   TofHandle = osThreadNew(Tof_Loop, NULL, &Tof_attributes);
+
+  /* creation of Lisii */
+  LisiiHandle = osThreadNew(Lisii_Loop, NULL, &Lisii_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

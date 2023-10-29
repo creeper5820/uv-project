@@ -14,6 +14,7 @@ struct Data_OpenCV {
     int flag_turn;
     int flag_slow;
     int flag_stop;
+    int flag_offset;
 };
 
 /*****************
@@ -32,11 +33,12 @@ struct Data_Tof {
  */
 typedef struct Control_System Control_System;
 struct Control_System {
+    int model_pid;
     float factor_p;
     float factor_i;
     float factor_d;
     float factor_encode;
-    bool model_pid;
+    int offset_max;
 };
 
 /********************************
@@ -52,15 +54,17 @@ struct Control_Motion {
 
 /*******************************
  * @brief Value to control light
+ * @param status
  */
 typedef struct Control_Light Control_Light;
 struct Control_Light {
     int status;
+    int task;
 };
 
 typedef struct Control_Led Control_Led;
 struct Control_Led {
-    bool light[4];
+    int light[4];
 };
 
 enum Status_Light {
@@ -71,4 +75,13 @@ enum Status_Light {
     LIGHT_HEAD,
     LIGHT_TAIL,
     FLASH_ALL,
+};
+
+// The Model and function
+enum Model_Task {
+    TASK_A,
+    TASK_B,
+    TASK_C,
+    MODEL_DEBUG,
+    PREPARE,
 };

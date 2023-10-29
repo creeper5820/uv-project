@@ -9,20 +9,18 @@ extern "C" {
 void Tof_Loop();
 }
 
-extern Serial_Transceiver tof;
-extern Serial_Transceiver lisii;
-extern char data_tof_temp[10];
 extern QueueHandle_t Queue_Tof;
 
+auto tof = Serial_Transceiver(&huart5);
 static Data_Tof data_tof;
 
 void Tof_Loop()
 {
     for (;;) {
-        tof.Recevice_A((uint8_t *)data_tof_temp, sizeof(data_tof_temp));
-        data_tof.distance = atoi(data_tof_temp);
+        tof.Recevice_A();
+        data_tof.distance = atoi(tof.Get_Data());
 
-        if (data_tof.distance < 200) {
+        if (data_tof.distance < 250 + 1 && data_tof.distance != 0) {
             xQueueSend(Queue_Tof, &data_tof, 0);
         }
 
