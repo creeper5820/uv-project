@@ -1,5 +1,7 @@
 #include "Light.hh"
 
+static Data_Light data_light;
+
 void Light_Loop()
 {
     leds.Add(Led_Controller(LED_1_GPIO_Port, LED_1_Pin));
@@ -8,56 +10,56 @@ void Light_Loop()
     leds.Add(Led_Controller(LED_4_GPIO_Port, LED_4_Pin));
 
     for (;;) {
-        xQueueReceive(Queue_Light, &control_light, 0);
+        xQueueReceive(Queue_Light, &data_light, 0);
 
-        switch (control_light.status) {
-            case LIGHT_ALL:
-                Light_All();
-                break;
+        switch (data_light.status) {
+        case LIGHT_ALL:
+            Light_All();
+            break;
 
-            case DARK_ALL:
-                Dark_All();
-                break;
+        case DARK_ALL:
+            Dark_All();
+            break;
 
-            case LIGHT_LEFT:
-                Light_Left();
-                break;
+        case LIGHT_LEFT:
+            Light_Left();
+            break;
 
-            case LIGHT_RIGHT:
-                Light_Right();
-                break;
+        case LIGHT_RIGHT:
+            Light_Right();
+            break;
 
-            case LIGHT_HEAD:
-                Light_Head();
-                break;
+        case LIGHT_HEAD:
+            Light_Head();
+            break;
 
-            case LIGHT_TAIL:
-                Light_Tail();
-                break;
+        case LIGHT_TAIL:
+            Light_Tail();
+            break;
 
-            case FLASH_ALL:
-                Flash_All();
-                break;
+        case FLASH_ALL:
+            Flash_All();
+            break;
 
-            default:
-                break;
+        default:
+            break;
         }
 
-        switch (control_light.task) {
-            case PREPARE:
-                break;
-            case MODEL_DEBUG:
-                leds.Light_Single(0);
-                break;
-            case TASK_A:
-                leds.Light_Single(1);
-                break;
-            case TASK_B:
-                leds.Light_Single(2);
-                break;
-            case TASK_C:
-                leds.Light_Single(3);
-                break;
+        switch (data_light.task) {
+        case PREPARE:
+            break;
+        case MODEL_DEBUG:
+            leds.Light_Single(0);
+            break;
+        case TASK_A:
+            leds.Light_Single(1);
+            break;
+        case TASK_B:
+            leds.Light_Single(2);
+            break;
+        case TASK_C:
+            leds.Light_Single(3);
+            break;
         }
     }
 }
@@ -77,20 +79,20 @@ void Wait_Start()
 
 void Wait_Tof()
 {
-    leds.Set({1, 1, 1, 1});
+    leds.Set({ 1, 1, 1, 1 });
     osDelay(300);
-    leds.Set({0, 0, 0, 0});
+    leds.Set({ 0, 0, 0, 0 });
     osDelay(300);
 }
 
 void Light_All()
 {
-    leds.Set({1, 1, 1, 1});
+    leds.Set({ 1, 1, 1, 1 });
 }
 
 void Dark_All()
 {
-    leds.Set({0, 0, 0, 0});
+    leds.Set({ 0, 0, 0, 0 });
 }
 
 void Flash_All()

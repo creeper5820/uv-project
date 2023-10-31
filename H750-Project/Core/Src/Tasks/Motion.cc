@@ -16,39 +16,84 @@ void Motion_Loop();
 }
 
 extern QueueHandle_t Queue_Motion;
-extern QueueHandle_t Queue_Opencv;
+extern QueueHandle_t Queue_System;
+extern QueueHandle_t Queue_Offset;
 extern Serial_Transceiver lisii;
-
-static Control_System contorl_system{0, 850, 0.0, 1, 2430, 300};
-static Control_Motion control_motion{0, 0};
-static Data_OpenCV data_opencv;
-
-auto motion_controller = Motion_Controller(&contorl_system);
 
 void Motion_Loop()
 {
-    contorl_system.offset_max    = 300;
-    contorl_system.factor_encode = 2430;
-    contorl_system.model_pid     = 0;
+    static Data_System data_system{ 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+    static Data_Motion data_motion{ 0, 0 };
+    static int offset = 0;
 
-    motion_controller.Init();
+    // S_0_0_0_0_0_0_2430_300_0
+
+    data_system.factor_p_m = 120;
+    data_system.factor_i_m = 0.1;
+    data_system.factor_d_m = 65;
+
+    data_system.factor_p_s = 0;
+    data_system.factor_i_s = 0;
+    data_system.factor_d_s = 0;
+
+    data_system.encode_max = 4860;
+    data_system.offset_max = 300;
+    data_system.model_pid = 0;
+
+    // M_0_0_E
+
+    data_motion.speed = 0;
+    data_motion.direction = 0;
+
+    auto motion = Motion_Controller(&data_system);
+
+    motion.Init();
 
     for (;;) {
-        if (xQueueReceive(Queue_Motion, &control_motion, 100) == pdPASS)
-            lisii.Send((char *)"Receive Motion\n", sizeof("Receive Motion"));
 
-        if (xQueueReceive(Queue_Opencv, &data_opencv, 100) == pdPASS)
-            Show_Data_OpenCV(data_opencv, lisii);
+        if (xQueueReceive(Queue_System, &data_system, 0) == pdTRUE) {
+            motion.Load_System(&data_system);
 
-        control_motion.direction -= (float)data_opencv.flag_offset / contorl_system.offset_max;
+            if (false)
+                Show_Data_System(data_system, lisii);
+        }
 
-        if (control_motion.direction > 1.0)
-            control_motion.direction = 1.0;
+        if (xQueueReceive(Queue_Motion, &data_motion, 0) == pdTRUE)
+            motion.Load_Motion(&data_motion);
 
-        if (control_motion.direction < -1.0)
-            control_motion.direction = -1.0;
+        if (xQueueReceive(Queue_Offset, &offset, 0) == pdTRUE) {
+            motion.Load_Offset(offset);
 
-        motion_controller.Load_Target(&control_motion);
+            if (1) {
+                char send_offset[20];
+                int size_offset = sprintf(send_offset, "offset: %d", offset);
+                lisii.Send(send_offset, size_offset);
+            }
+        }
+
+        motion.Load();
+
+        // 测速打印
+        if (0) {
+            char send[40];
+            int size = sprintf(send, "speed*100: %.1f,%.1f\n",
+                motion.Read_Speed(0) * 100, motion.Read_Speed(1) * 100);
+
+            lisii.Send(send, size);
+        }
+
+        if (1) {
+            int count = 0;
+            TIM2->CNT = 0;
+
+            osDelay(50);
+
+            count = (short)TIM2->CNT;
+
+            char send_count[20];
+            int size_count = sprintf(send_count, "count: %d\n", count);
+            lisii.Send(send_count, size_count);
+        }
 
         osDelay(50);
     }

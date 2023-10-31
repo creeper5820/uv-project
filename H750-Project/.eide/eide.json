@@ -3,6 +3,7 @@
   "type": "ARM",
   "dependenceList": [],
   "srcDirs": [
+    ".eide/deps",
     "Core",
     "Middlewares",
     "Drivers"
@@ -16,7 +17,7 @@
   "deviceName": null,
   "packDir": null,
   "miscInfo": {
-    "uid": "b4f5878f97c9cd16aa621d9fd97c7f25"
+    "uid": "021d28e6664a9eb05abed06cc5a11ad6"
   },
   "targets": {
     "Debug": {
@@ -45,8 +46,8 @@
           "bin": "",
           "baseAddr": "",
           "cpuInfo": {
-            "vendor": "ST",
-            "cpuName": "STM32H750VB"
+            "vendor": "null",
+            "cpuName": "null"
           },
           "proType": 1,
           "speed": 8000,
@@ -63,9 +64,13 @@
           "Middlewares/Third_Party/FreeRTOS/Source/CMSIS_RTOS_V2",
           "Middlewares/Third_Party/FreeRTOS/Source/portable/GCC/ARM_CM4F",
           "Drivers/CMSIS/Device/ST/STM32H7xx/Include",
-          "Drivers/CMSIS/Include"
+          "Drivers/CMSIS/Include",
+          ".eide/deps"
         ],
-        "libList": [],
+        "libList": [
+          "Drivers",
+          "Middlewares"
+        ],
         "sourceDirList": [],
         "defineList": [
           "DEBUG",
@@ -88,26 +93,19 @@
         },
         "options": "null"
       },
-      "uploader": "OpenOCD",
+      "uploader": "JLink",
       "uploadConfig": {
         "bin": "",
-        "target": "stm32h7x",
-        "interface": "cmsis-dap",
-        "baseAddr": "0x08000000"
+        "baseAddr": "",
+        "cpuInfo": {
+          "vendor": "null",
+          "cpuName": "null"
+        },
+        "proType": 1,
+        "speed": 8000,
+        "otherCmds": ""
       },
-      "uploadConfigMap": {
-        "JLink": {
-          "bin": "",
-          "baseAddr": "",
-          "cpuInfo": {
-            "vendor": "ST",
-            "cpuName": "STM32H750VB"
-          },
-          "proType": 1,
-          "speed": 8000,
-          "otherCmds": ""
-        }
-      },
+      "uploadConfigMap": {},
       "custom_dep": {
         "name": "default",
         "incList": [

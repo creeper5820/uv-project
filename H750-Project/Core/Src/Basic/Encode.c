@@ -5,7 +5,7 @@
  */
 void Encoder_Init()
 {
-    HAL_TIM_Encoder_Start(&htim3, TIM_CHANNEL_ALL);
+    HAL_TIM_Encoder_Start(&htim2, TIM_CHANNEL_ALL);
     HAL_TIM_Encoder_Start(&htim4, TIM_CHANNEL_ALL);
 }
 
@@ -16,6 +16,7 @@ void Encoder_Init()
 int Read_Encoder(uint8_t TIMX)
 {
     int Encoder_TIM;
+    
     switch (TIMX) {
 
         case 4: {
@@ -24,9 +25,9 @@ int Read_Encoder(uint8_t TIMX)
             break;
         }
 
-        case 3: {
-            Encoder_TIM = (short)TIM3->CNT;
-            TIM3->CNT   = 0;
+        case 2: {
+            Encoder_TIM = (short)TIM2->CNT;
+            TIM2->CNT   = 0;
             break;
         }
 

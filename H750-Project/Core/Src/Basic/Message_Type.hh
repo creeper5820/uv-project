@@ -31,14 +31,17 @@ struct Data_Tof {
  * @param factor_p
  * @param factor_encode
  */
-typedef struct Control_System Control_System;
-struct Control_System {
-    int model_pid;
-    float factor_p;
-    float factor_i;
-    float factor_d;
-    float factor_encode;
+typedef struct Data_System Data_System;
+struct Data_System {
+    float factor_p_m;
+    float factor_i_m;
+    float factor_d_m;
+    float factor_p_s;
+    float factor_i_s;
+    float factor_d_s;
+    float encode_max;
     int offset_max;
+    int model_pid;
 };
 
 /********************************
@@ -46,8 +49,8 @@ struct Control_System {
  * @param speed
  * @param direction
  */
-typedef struct Control_Motion Control_Motion;
-struct Control_Motion {
+typedef struct Data_Motion Data_Motion;
+struct Data_Motion {
     float speed;
     float direction;
 };
@@ -56,14 +59,14 @@ struct Control_Motion {
  * @brief Value to control light
  * @param status
  */
-typedef struct Control_Light Control_Light;
-struct Control_Light {
+typedef struct Data_Light Data_Light;
+struct Data_Light {
     int status;
     int task;
 };
 
-typedef struct Control_Led Control_Led;
-struct Control_Led {
+typedef struct Data_Led Data_Led;
+struct Data_Led {
     int light[4];
 };
 
@@ -75,6 +78,7 @@ enum Status_Light {
     LIGHT_HEAD,
     LIGHT_TAIL,
     FLASH_ALL,
+    FLASH_THREE,
 };
 
 // The Model and function

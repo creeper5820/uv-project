@@ -11,8 +11,7 @@ void Light_Loop();
 
 extern QueueHandle_t Queue_Light;
 
-auto leds          = Led_Group();
-auto control_light = Control_Light{};
+auto leds = Led_Group();
 
 void Wait_Start();
 void Wait_Tof();

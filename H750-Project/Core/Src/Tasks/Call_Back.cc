@@ -5,10 +5,10 @@
 #include "../Basic/Message_Type.hh"
 
 extern "C" {
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size);
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size);
 }
 
-void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef *huart, uint16_t Size)
+void HAL_UARTEx_RxEventCallback(UART_HandleTypeDef* huart, uint16_t Size)
 {
     extern Serial_Transceiver lisii;
 

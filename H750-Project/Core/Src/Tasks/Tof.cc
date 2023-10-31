@@ -11,7 +11,7 @@ void Tof_Loop();
 
 extern QueueHandle_t Queue_Tof;
 
-auto tof = Serial_Transceiver(&huart5);
+auto tof = Serial_Transceiver(&huart1);
 static Data_Tof data_tof;
 
 void Tof_Loop()
@@ -20,8 +20,8 @@ void Tof_Loop()
         tof.Recevice_A();
         data_tof.distance = atoi(tof.Get_Data());
 
-        if (data_tof.distance < 250 + 1 && data_tof.distance != 0) {
-            xQueueSend(Queue_Tof, &data_tof, 0);
+        if (data_tof.distance != 0) {
+            xQueueSendToFront(Queue_Tof, &data_tof, 0);
         }
 
         osDelay(100);

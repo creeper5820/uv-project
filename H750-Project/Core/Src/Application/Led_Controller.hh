@@ -6,10 +6,9 @@
 /************************************************************
  * @brief Class to control a led by setting gpio high and low
  */
-class Led_Controller
-{
+class Led_Controller {
 private:
-    GPIO_TypeDef *type_;
+    GPIO_TypeDef* type_;
     uint16_t pin_;
 
 public:
@@ -17,9 +16,9 @@ public:
     {
     }
 
-    Led_Controller(GPIO_TypeDef *type, uint16_t pin)
-        : type_(type),
-          pin_(pin)
+    Led_Controller(GPIO_TypeDef* type, uint16_t pin)
+        : type_(type)
+        , pin_(pin)
     {
     }
 
@@ -37,8 +36,7 @@ public:
 /***********************
  * @brief A group of led
  */
-class Led_Group
-{
+class Led_Group {
 private:
     Led_Controller leds_[4];
     int size_;
@@ -69,11 +67,11 @@ public:
         leds_[number].Light();
     }
 
-    void Set(Control_Led control_led)
+    void Set(Data_Led data)
     {
         for (int i = 0; i < 4; i++) {
 
-            if (control_led.light[i])
+            if (data.light[i])
                 leds_[i].Light();
             else
                 leds_[i].Dark();
