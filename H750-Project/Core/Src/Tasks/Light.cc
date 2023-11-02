@@ -13,6 +13,7 @@ void Light_Loop()
         xQueueReceive(Queue_Light, &data_light, 0);
 
         switch (data_light.status) {
+
         case LIGHT_ALL:
             Light_All();
             break;
@@ -41,13 +42,6 @@ void Light_Loop()
             Flash_All();
             break;
 
-        default:
-            break;
-        }
-
-        switch (data_light.task) {
-        case PREPARE:
-            break;
         case MODEL_DEBUG:
             leds.Light_Single(0);
             break;
@@ -59,6 +53,9 @@ void Light_Loop()
             break;
         case TASK_C:
             leds.Light_Single(3);
+            break;
+
+        default:
             break;
         }
     }

@@ -25,6 +25,17 @@ struct Data_Tof {
     int distance;
 };
 
+/*********************
+ * @brief Side marigin
+ * @param margin_a
+ * @param margin_b
+*/
+typedef struct Data_Margin Data_Margin;
+struct Data_Margin {
+    int margin_a;
+    int margin_b;
+};
+
 /*****************
  * @param factor_k
  * @param factor_i
@@ -52,7 +63,7 @@ struct Data_System {
 typedef struct Data_Motion Data_Motion;
 struct Data_Motion {
     float speed;
-    float direction;
+    float distance;
 };
 
 /*******************************
@@ -62,7 +73,6 @@ struct Data_Motion {
 typedef struct Data_Light Data_Light;
 struct Data_Light {
     int status;
-    int task;
 };
 
 typedef struct Data_Led Data_Led;
@@ -70,7 +80,14 @@ struct Data_Led {
     int light[4];
 };
 
-enum Status_Light {
+// The Model and function
+enum Model {
+    MODEL_DEBUG = 0,
+    TASK_A,
+    TASK_B,
+    TASK_C,
+    PREPARED,
+
     LIGHT_ALL,
     DARK_ALL,
     LIGHT_LEFT,
@@ -79,13 +96,4 @@ enum Status_Light {
     LIGHT_TAIL,
     FLASH_ALL,
     FLASH_THREE,
-};
-
-// The Model and function
-enum Model_Task {
-    TASK_A,
-    TASK_B,
-    TASK_C,
-    MODEL_DEBUG,
-    PREPARE,
 };

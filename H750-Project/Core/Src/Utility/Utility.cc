@@ -65,7 +65,21 @@ void Utility_Get_Data_Motion(char* data, Data_Motion* motion)
     motion->speed = atof(position);
 
     Utility_Next(&position);
-    motion->direction = atof(position);
+    motion->distance = atof(position);
+}
+
+void Utility_Get_Data_Margin(char* data, Data_Margin* margin)
+{
+    if (data[0] != 'D')
+        return;
+
+    char* position = data;
+
+    Utility_Next(&position);
+    margin->margin_a = atoi(position);
+
+    Utility_Next(&position);
+    margin->margin_b = atoi(position);
 }
 
 // the utility to show data_opencv
@@ -114,4 +128,28 @@ void Show_Data_System(Data_System data, Serial_Transceiver serial)
     serial.Send(send, strlen(send));
 
     osDelay(50);
+}
+
+void Show_Data_Margin(Data_Margin data, Serial_Transceiver serial)
+{
+    char send[20];
+
+    int size = sprintf(send,
+        "%4d %4d\n",
+        data.margin_a, data.margin_b);
+
+    serial.Send(send, size);
+
+    osDelay(50);
+}
+
+int Button_Scan(GPIO_TypeDef* GPIOx, uint16_t GPIO_Pin)
+{
+    if (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == GPIO_PIN_SET) {
+        osDelay(20);
+        if (HAL_GPIO_ReadPin(GPIOx, GPIO_Pin) == GPIO_PIN_SET)
+            return 1;
+    }
+
+    return 0;
 }

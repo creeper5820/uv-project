@@ -2,6 +2,7 @@
 
 #include "cmsis_os.h"
 #include "stdio.h"
+#include "math.h"
 
 #include "../Basic/Motor.h"
 #include "../Basic/Servo.h"
@@ -12,19 +13,35 @@ class Motion_Controller {
 public:
     Data_System system_;
     Data_Motion motion_;
+    Data_Margin margin_;
 
     int offset_;
 
     // PID params of speed
     float bias_ = 0;
     float bias_last_ = 0;
+    float bias_integral_ = 0;
 
-    // PID params if direction
-    float speed_current_ = 0;
-    float direction_current_ = 0;
+    // PID params if distance
+    int bias_distance_a_ = 0;
+    int bias_distance_last_a_ = 0;
+    int bias_distance_integral_a_ = 0;
+
+    int bias_distance_b_ = 0;
+    int bias_distance_last_b_ = 0;
+    int bias_distance_integral_b_ = 0;
+
+    int bias_distance_ = 0;
+    int bias_distance_last_ = 0;
+    int bias_distance_integral_ = 0;
+
+    int model_direction = 1;
 
     int pwm_speed_ = 0;
-    int pwm_direction_ = 0;
+    int pwm_distance_ = 0;
+
+    float speed_current_ = 0;
+    float direction_current_ = 0;
 
 public:
     Motion_Controller()
@@ -50,7 +67,7 @@ public:
 
     void Load()
     {
-        Set_Direction(motion_.direction);
+        Set_Direction(motion_.distance);
         Set_Speed(motion_.speed);
     }
 
@@ -59,8 +76,8 @@ public:
         if (abs(data->speed - 114) > 0.001)
             motion_.speed = data->speed;
 
-        if (abs(data->direction - 114) > 0.001)
-            motion_.direction = data->direction;
+        if (abs(data->distance - 114) > 0.001)
+            motion_.distance = data->distance;
     }
 
     void Load_System(Data_System* data)
@@ -93,9 +110,9 @@ public:
             system_.model_pid = data->model_pid;
     }
 
-    void Load_Offset(int offset)
+    void Load_Margin(Data_Margin* data)
     {
-        offset_ = offset;
+        margin_ = *data;
     }
 
     /******************************************
@@ -116,49 +133,114 @@ public:
 
     void Set_Speed(float speed)
     {
-        Set_Motor_Pwm(Pwm_Speed_Pid(speed));
-    }
+        if (!system_.model_pid) {
 
-    void Set_Direction(float direction)
-    {
-        if (direction == 0) {
-            direction += (float)offset_ / system_.offset_max;
+            pwm_speed_ = speed * PWM_limit;
         }
+        else {
+            speed_current_ = Read_Speed(1);
+            bias_ = speed - speed_current_;
 
-        if (direction > 1.0)
-            direction = 1;
+            pwm_speed_
+                = (float)system_.factor_p_m * bias_
+                + (float)system_.factor_i_m * bias_integral_
+                + (float)system_.factor_d_m * (bias_ - bias_last_);
 
-        if (direction < -1.0)
-            direction = -1;
-
-        int pwm_direction = 780 - direction * 50;
-
-        Set_Servo_Duty(pwm_direction);
-    }
-
-    /********************
-     * @brief PID control
-     */
-    float Pwm_Speed_Pid(float speed_target)
-    {
-        if (system_.model_pid) {
-
-            bias_ = speed_target - Read_Speed(1);
-
-            float pwm_add
-                = system_.factor_p_m * bias_
-                + system_.factor_i_m * bias_ * 0.01
-                + system_.factor_d_m * (bias_ - bias_last_);
-
-            pwm_speed_ += pwm_add;
+            if (abs(bias_ - bias_last_) > 0.01)
+                bias_integral_ += bias_;
 
             bias_last_ = bias_;
         }
-        else {
-            pwm_speed_ = speed_target * PWM_limit;
+
+        Set_Motor_Pwm(pwm_speed_);
+    }
+
+    void Set_Direction_base(float distance)
+    {
+        // 读数据进行筛选
+        {
+            if (margin_.margin_a == 0 || margin_.margin_b == 0 || margin_.margin_a == 8888 || margin_.margin_b == 8888)
+                return;
         }
 
-        return pwm_speed_;
+        // 保持距离的函数
+        int pwm_add_distance = 0;
+        int factor_distance = 1;
+        int limit_distance = 20;
+
+        bias_distance_ = Get_Distance() - motion_.distance;
+
+        pwm_add_distance = bias_distance_ * factor_distance;
+
+        if (pwm_add_distance > limit_distance)
+            pwm_add_distance = limit_distance;
+
+        if (pwm_add_distance < -limit_distance)
+            pwm_add_distance = -limit_distance;
+
+        // 保持平衡的函数
+        int pwm_add_balance = 0;
+        int factor_balance = 3;
+        int limit_balance = 30;
+
+        pwm_add_balance
+            = (margin_.margin_a - margin_.margin_b) * factor_balance;
+
+        if (pwm_add_balance > limit_balance)
+            pwm_add_balance = limit_balance;
+
+        if (pwm_add_balance < -limit_balance)
+            pwm_add_balance = -limit_balance;
+
+        pwm_distance_ = 780 + pwm_add_balance + pwm_add_distance;
+
+        Set_Servo_Duty(pwm_distance_);
+    }
+
+    float Get_Distance()
+    {
+        if (margin_.margin_a > 100)
+            margin_.margin_a = 80;
+        if (margin_.margin_b > 100)
+            margin_.margin_b = 80;
+
+        return (9 * (margin_.margin_a + margin_.margin_b))
+            / (2 * sqrt(pow(9, 2) + pow(abs(margin_.margin_a - margin_.margin_b), 2)));
+    }
+
+    void Set_Direction(int distance)
+    {
+        // margin_.margin_a;  测量值a
+        // margin_.margin_b;  测量值b
+
+        int distance_a = margin_.margin_a;
+        int distance_b = margin_.margin_b;
+
+        int limit_pwm_distance = 50;
+
+        if (distance_a > 80)
+            distance_a = 80;
+        if (distance_b > 80)
+            distance_b = 80;
+
+        bias_distance_ = distance_a - distance_b;
+
+        pwm_distance_
+            = 780
+            + (float)system_.factor_p_s * bias_distance_
+            + (float)system_.factor_i_s * bias_distance_ * 0.01
+            + (float)system_.factor_d_s * (bias_distance_ - bias_distance_last_);
+
+        pwm_distance_ += (distance - Get_Distance()) / 2;
+
+        if (pwm_distance_ > 780 + limit_pwm_distance)
+            pwm_distance_ = 780 + limit_pwm_distance;
+        if (pwm_distance_ < 780 - limit_pwm_distance)
+            pwm_distance_ = 780 - limit_pwm_distance;
+
+        bias_distance_last_ = bias_distance_;
+
+        Set_Servo_Duty(pwm_distance_);
     }
 
     float Read_Speed(bool encoder)
@@ -190,7 +272,7 @@ public:
             }
         }
 
-        return (float)(count) / (-system_.encode_max);
+        return -(float)(count) / (-system_.encode_max);
     }
 
     void Print_Speed(Serial_Transceiver serial)

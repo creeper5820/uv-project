@@ -15,7 +15,6 @@ extern QueueHandle_t Queue_Opencv;
 extern QueueHandle_t Queue_System;
 extern QueueHandle_t Queue_Tof;
 extern QueueHandle_t Queue_Motion;
-extern QueueHandle_t Queue_Offset;
 
 // Serial port initiallize
 auto lisii = Serial_Transceiver(&huart5);
@@ -34,6 +33,7 @@ void Lisii_Loop()
 
         if (lisii.Get_Status() == OK) {
             lisii.Set_Wait();
+            lisii.Set_Empty();
 
             switch (lisii.Get_Data_Type()) {
             case 'R':
@@ -42,8 +42,6 @@ void Lisii_Loop()
 
                 // send message to main handler "Messager"
                 xQueueSend(Queue_Opencv, &data_opencv_temp, 5);
-
-                xQueueSend(Queue_Offset, &(data_opencv_temp.flag_offset), 5);
 
                 break;
 
@@ -74,6 +72,6 @@ void Lisii_Loop()
             }
         }
 
-        osDelay(50);
+        osDelay(5);
     }
 }

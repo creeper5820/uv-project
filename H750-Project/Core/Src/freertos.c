@@ -66,28 +66,35 @@ osThreadId_t MotionHandle;
 const osThreadAttr_t Motion_attributes = {
   .name = "Motion",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal1,
 };
 /* Definitions for Light */
 osThreadId_t LightHandle;
 const osThreadAttr_t Light_attributes = {
   .name = "Light",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal1,
 };
 /* Definitions for Tof */
 osThreadId_t TofHandle;
 const osThreadAttr_t Tof_attributes = {
   .name = "Tof",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal2,
 };
 /* Definitions for Lisii */
 osThreadId_t LisiiHandle;
 const osThreadAttr_t Lisii_attributes = {
   .name = "Lisii",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityNormal2,
+};
+/* Definitions for Margin */
+osThreadId_t MarginHandle;
+const osThreadAttr_t Margin_attributes = {
+  .name = "Margin",
+  .stack_size = 128 * 4,
+  .priority = (osPriority_t) osPriorityNormal2,
 };
 
 /* Private function prototypes -----------------------------------------------*/
@@ -101,6 +108,7 @@ extern void Motion_Loop(void *argument);
 extern void Light_Loop(void *argument);
 extern void Tof_Loop(void *argument);
 extern void Lisii_Loop(void *argument);
+extern void Margin_Loop(void *argument);
 
 void MX_FREERTOS_Init(void); /* (MISRA C 2004 rule 8.1) */
 
@@ -148,6 +156,9 @@ void MX_FREERTOS_Init(void) {
 
   /* creation of Lisii */
   LisiiHandle = osThreadNew(Lisii_Loop, NULL, &Lisii_attributes);
+
+  /* creation of Margin */
+  MarginHandle = osThreadNew(Margin_Loop, NULL, &Margin_attributes);
 
   /* USER CODE BEGIN RTOS_THREADS */
   /* add threads, ... */

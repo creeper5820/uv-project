@@ -44,6 +44,16 @@ public:
         HAL_UART_Receive_DMA(huart_ptr_, (uint8_t*)data_, sizeof(data_));
     }
 
+    void Recevice_C()
+    {
+        HAL_UART_Receive_IT(huart_ptr_, (uint8_t*)data_, sizeof(data_));
+    }
+
+    void Recevice_D()
+    {
+        HAL_UART_Receive(huart_ptr_, (uint8_t*)data_, sizeof(data_), 50);
+    }
+
     /**
      * @brief Some function to get
      */
@@ -68,9 +78,15 @@ public:
 
     void Set_Size(int size) { size_ = size; }
 
+    void Set_Empty()
+    {
+        for (int i = size_; i < 50; i++) {
+            data_[i] = '\0';
+        }
+    }
+
     void Hello_World()
     {
-        char str[] = "Hello World!";
-        HAL_UART_Transmit_DMA(huart_ptr_, (uint8_t*)str, sizeof(str));
+        HAL_UART_Transmit_DMA(huart_ptr_, (uint8_t*)&"Hello World!\n", sizeof("Hello World!"));
     }
 };

@@ -18,83 +18,73 @@ void Motion_Loop();
 extern QueueHandle_t Queue_Motion;
 extern QueueHandle_t Queue_System;
 extern QueueHandle_t Queue_Offset;
+extern QueueHandle_t Queue_Margin;
+
 extern Serial_Transceiver lisii;
 
 void Motion_Loop()
 {
     static Data_System data_system{ 0, 0, 0, 0, 0, 0, 0, 0, 0 };
     static Data_Motion data_motion{ 0, 0 };
-    static int offset = 0;
+    static Data_Margin data_margin{ 0, 0 };
 
     // S_0_0_0_0_0_0_2430_300_0
 
-    data_system.factor_p_m = 120;
-    data_system.factor_i_m = 0.1;
-    data_system.factor_d_m = 65;
+    data_system.factor_p_m = 800;
+    data_system.factor_i_m = 180;
+    data_system.factor_d_m = 40;
 
-    data_system.factor_p_s = 0;
+    data_system.factor_p_s = 20;
     data_system.factor_i_s = 0;
     data_system.factor_d_s = 0;
 
-    data_system.encode_max = 4860;
+    data_system.encode_max = 5000;
     data_system.offset_max = 300;
     data_system.model_pid = 0;
 
     // M_0_0_E
 
     data_motion.speed = 0;
-    data_motion.direction = 0;
+    data_motion.distance = 40;
 
     auto motion = Motion_Controller(&data_system);
 
     motion.Init();
 
     for (;;) {
-
-        if (xQueueReceive(Queue_System, &data_system, 0) == pdTRUE) {
+        if (xQueueReceive(Queue_System, &data_system, 0) == pdTRUE)
             motion.Load_System(&data_system);
-
-            if (false)
-                Show_Data_System(data_system, lisii);
-        }
 
         if (xQueueReceive(Queue_Motion, &data_motion, 0) == pdTRUE)
             motion.Load_Motion(&data_motion);
 
-        if (xQueueReceive(Queue_Offset, &offset, 0) == pdTRUE) {
-            motion.Load_Offset(offset);
-
-            if (1) {
-                char send_offset[20];
-                int size_offset = sprintf(send_offset, "offset: %d", offset);
-                lisii.Send(send_offset, size_offset);
-            }
+        if (xQueueReceive(Queue_Margin, &data_margin, 0) == pdTRUE) {
+            motion.Load_Margin(&data_margin);
         }
 
         motion.Load();
 
-        // 测速打印
         if (0) {
             char send[40];
-            int size = sprintf(send, "speed*100: %.1f,%.1f\n",
-                motion.Read_Speed(0) * 100, motion.Read_Speed(1) * 100);
+            int size = sprintf(send, "speed: %.2f,%.2f\n",
+                motion.motion_.speed, motion.speed_current_);
 
             lisii.Send(send, size);
         }
 
-        if (1) {
-            int count = 0;
-            TIM2->CNT = 0;
+        if (0)
+            Show_Data_System(motion.system_, lisii);
 
-            osDelay(50);
+        if (1)
+            Show_Data_Margin(data_margin, lisii);
 
-            count = (short)TIM2->CNT;
-
-            char send_count[20];
-            int size_count = sprintf(send_count, "count: %d\n", count);
-            lisii.Send(send_count, size_count);
+        if (0) {
+            char send_distance[20];
+            int size_distance = sprintf(send_distance,
+                "distance: %.2f\n", motion.Get_Distance());
+            lisii.Send(send_distance, size_distance);
         }
 
-        osDelay(50);
+        osDelay(5);
     }
 }
