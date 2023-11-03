@@ -57,6 +57,10 @@ void Error_Handler(void);
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
+#define Light_2_Pin GPIO_PIN_2
+#define Light_2_GPIO_Port GPIOE
+#define Light_1_Pin GPIO_PIN_3
+#define Light_1_GPIO_Port GPIOE
 #define Servo_Pin_Pin GPIO_PIN_5
 #define Servo_Pin_GPIO_Port GPIOE
 #define Right_Motor_Pin GPIO_PIN_4
@@ -81,6 +85,10 @@ void Error_Handler(void);
 #define Button_2_GPIO_Port GPIOB
 #define Button_1_Pin GPIO_PIN_5
 #define Button_1_GPIO_Port GPIOB
+#define Light_4_Pin GPIO_PIN_0
+#define Light_4_GPIO_Port GPIOE
+#define Light_3_Pin GPIO_PIN_1
+#define Light_3_GPIO_Port GPIOE
 
 /* USER CODE BEGIN Private defines */
 

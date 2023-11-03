@@ -1,5 +1,9 @@
 #include "Messager.hh"
 
+#define STRAIGHT 0
+#define LEFT 1
+#define RIGHT 2
+
 // Message caches
 static Data_OpenCV data_opencv_temp;
 static Data_Motion data_motion_temp;
@@ -7,6 +11,7 @@ static Data_Tof data_tof_temp;
 static Data_Light data_light_temp;
 
 extern Serial_Transceiver lisii;
+extern Motion_Controller motion;
 
 // Queue to use
 auto Queue_Motion = xQueueCreate(1, sizeof(Data_Motion));
@@ -78,12 +83,14 @@ void Begin()
     }
 
     Light_Mode(FLASH_ALL);
+
     if (flag_debug)
         lisii.Send((char*)"Wait OrangePi to send message\n", sizeof("Wait OrangePi to send message"));
 
     // 等待香橙派发送信息
     if (flag_wait_pi)
         while (xQueueReceive(Queue_Opencv, &data_opencv_temp, 100) != pdTRUE) {
+            Light_Mode(FLASH_ALL);
             // 避免阻塞优先级低的线程，有必要加一个延时
             osDelay(50);
         }
@@ -132,11 +139,11 @@ void Begin()
 }
 
 /******************************************
- * @brief Function of the task a
+ * @brief 直线行驶的任务, 直线行驶至墙墙则停止
  */
 void Task_A()
 {
-    float speed_task_a = 0.20;
+    float speed_task_a = 0.25;
 
     Set_Speed(0, distance_right);
 
@@ -153,7 +160,7 @@ void Task_A()
     osDelay(1000);
 
     // 检测到前方的墙后进行下一步
-    Scan_Block_Next(150);
+    Scan_Block_Next(90);
 
     if (flag_debug)
         lisii.Send((char*)"stop\n", sizeof("stop"));
@@ -175,102 +182,125 @@ void Task_A()
 }
 
 /******************************************
- * @brief Function of the task b
+ * @brief 绕行锥桶的任务,右车道遇到锥桶转向左车道,再次遇到锥桶后转向右车道,最后停止
  */
 void Task_B()
 {
-    int time_turn = 1000;
-
-    float speed_run = 0.20;
-    float direction_turn = 0.5;
-
-    // 直行
-    Straight(speed_run);
-
-    // 设置任务灯
-    data_light_temp.status = TASK_B;
+    data_light_temp.status = TASK_C;
     xQueueOverwrite(Queue_Light, &data_light_temp);
 
-    // 等待香橙派发送转向信息
-    do {
-        xQueueReceive(Queue_Opencv, &data_opencv_temp, 100);
-        osDelay(50);
-    } while (data_opencv_temp.flag_turn == 0);
+    // 直线行驶
+    motion.flagTurn = STRAIGHT;
 
-    // 左转
-    Turn_Left(speed_run, direction_turn);
+    Set_Speed(0.25, distance_right);
 
-    osDelay(time_turn);
-
-    // 右转
-    Turn_Right(speed_run, direction_turn);
-
-    osDelay(time_turn);
-
-    // 直行
-    Straight(speed_run);
-
-    // 等待一段时间，或者超过同向行驶的车辆
-    osDelay(2000);
-
-    // 右转
-    Turn_Right(speed_run, direction_turn);
-
-    osDelay(time_turn);
-
-    // 左转
-    Turn_Left(speed_run, direction_turn);
-
-    osDelay(time_turn);
-
-    // 直行
-    Straight(speed_run);
-
-    // 闪三次
-    Light_Mode(FLASH_THREE);
-
-    // 等待会车结束
-    int flag_pass = 0;
-    do {
-        // TOF 距离突变来检测旁边的车擦身而过
-        if (1)
-            flag_pass++;
-    } while (flag_pass > 10);
-
-    // 左转
-    Turn_Left(speed_run, direction_turn);
-
-    osDelay(time_turn);
-
-    // 右转
-    Turn_Right(speed_run, direction_turn);
-
-    osDelay(time_turn);
-
-    // 直行
-    Straight(speed_run);
-
-    // 检测到墙后进行下一步
     Scan_Block_Next(150);
 
+    // 转向左车道
+    motion.flagTurn = LEFT;
+
+    osDelay(400);
+
+    motion.flagTurn = RIGHT;
+
+    osDelay(400);
+
+    // 回复直线行驶
+    motion.flagTurn = STRAIGHT;
+
+    Set_Speed(0.20, distance_left);
+
+    Scan_Block_Next(150);
+
+    // 转向右车道
+    motion.flagTurn = RIGHT;
+
+    osDelay(400);
+
+    motion.flagTurn = LEFT;
+
+    osDelay(400);
+
+    // 回复直线行驶
+    motion.flagTurn = STRAIGHT;
+
+    Set_Speed(0.20, distance_left);
+
+    Scan_Block_Next(100);
+
     // 刹车
-    Brake();
+    Set_Speed(-0.4, distance_left);
+
+    osDelay(400);
+
+    Set_Speed(0, distance_left);
 
     while (Button_Scan(Button_1_GPIO_Port, Button_1_Pin))
         ;
 }
 
 /******************************************
- * @brief Function of the task b
+ * @brief 超车会车的任务, 超过第一辆车,回道后和第二辆车回车,最后转向左车道
  */
 void Task_C()
 {
-    data_light_temp.status = TASK_C;
-    xQueueOverwrite(Queue_Light, &data_light_temp);
+    // 直线行驶
+    motion.flagTurn = STRAIGHT;
+    Set_Speed(0.25, distance_right);
+
+    // 遇到前方红色车
+    do {
+        xQueueReceive(Queue_Opencv, &data_opencv_temp, portMAX_DELAY);
+        osDelay(20);
+    } while (data_opencv_temp.flag_turn != 1);
+
+    // 向左转向
+    Turn_Left(400);
+
+    // 直线行驶
+    motion.flagTurn = STRAIGHT;
+    Set_Speed(0.25, distance_left);
+
+    // 等超过红色车辆
+    osDelay(1000);
+
+    // 转向右车道
+    Turn_Right(400);
+
+    // 直线行驶
+    motion.flagTurn = STRAIGHT;
+    Set_Speed(0.25, distance_right);
+
+    // 测距距离突然变小,检测到左方车辆
+    while (motion.bias_balance_ > -20)
+        ;
+
+    // 测距距离突然变大,检测到回车结束
+    while (motion.bias_balance_ < 20)
+        ;
+
+    // 向左转向
+    Turn_Left(400);
+
+    // 直线行驶
+    motion.flagTurn = STRAIGHT;
+    Set_Speed(0.25, distance_left);
+
+    Scan_Block_Next(100);
+
+    // 刹车
+    Set_Speed(-0.4, distance_left);
+
+    osDelay(400);
+
+    Set_Speed(0, distance_left);
+
+    while (Button_Scan(Button_1_GPIO_Port, Button_1_Pin))
+        ;
 }
 
 /******************************************
- * @brief Function of the debug
+ * @brief Debug用的任务,随意添加函数即可
  */
 void Model_Debug()
 {
@@ -284,7 +314,7 @@ void Model_Debug()
                 Show_Data_OpenCV(data_opencv_temp, lisii);
             }
 
-        if (1)
+        if (0)
             if (xQueueReceive(Queue_Tof, &data_tof_temp, 0) == pdTRUE) {
                 Show_Data_Tof(data_tof_temp, lisii);
             }
@@ -307,13 +337,23 @@ void Model_Debug()
 
         Set_Speed(0, 20);
 
-        osDelay(5);
-
-        if (!Button_Scan(Button_1_GPIO_Port, Button_1_Pin)) {
-            Light_Mode(PREPARED);
-            osDelay(300);
-            break;
+        if (0) {
+            HAL_GPIO_WritePin(Light_1_GPIO_Port, Light_1_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Light_2_GPIO_Port, Light_2_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Light_3_GPIO_Port, Light_3_Pin, GPIO_PIN_RESET);
+            HAL_GPIO_WritePin(Light_4_GPIO_Port, Light_4_Pin, GPIO_PIN_RESET);
         }
+
+        if (1) {
+            xQueueReceive(Queue_Opencv, &data_opencv_temp, portMAX_DELAY);
+
+            if (data_opencv_temp.flag_turn == 1)
+                motion.flagTurn = RIGHT;
+            else
+                motion.flagTurn = LEFT;
+        }
+
+        osDelay(50);
     }
 }
 
@@ -329,31 +369,13 @@ void Light_Mode(int mode)
     xQueueOverwrite(Queue_Light, &data_light_temp);
 }
 
-void Turn_Left(float speed, float direction)
-{
-    Light_Mode(LIGHT_LEFT);
-    Set_Speed(speed, -direction);
-}
-
-void Turn_Right(float speed, float direction)
-{
-    Light_Mode(LIGHT_RIGHT);
-    Set_Speed(speed, direction);
-}
-
-void Straight(float speed)
-{
-    Light_Mode(DARK_ALL);
-    Set_Speed(speed, distance_right);
-}
-
 // 检测到前方的障碍物 有障碍物时进行下一步
 void Scan_Block_Next(int distance)
 {
     int flag_block = 0;
     xQueueReset(Queue_Tof);
 
-    while (flag_block < 3) {
+    while (flag_block < 1) {
 
         xQueueReceive(Queue_Tof, &data_tof_temp, 10);
 
@@ -370,7 +392,7 @@ void Scan_Block_Stop(int distance)
     int flag_block = 0;
     xQueueReset(Queue_Tof);
 
-    while (flag_block < 3) {
+    while (flag_block < 1) {
 
         xQueueReceive(Queue_Tof, &data_tof_temp, 10);
 
@@ -381,16 +403,32 @@ void Scan_Block_Stop(int distance)
     };
 }
 
-void Brake()
+void Turn_Right(int time_ms)
 {
-    Light_Mode(LIGHT_TAIL);
+    // 转向右车道
+    motion.flagTurn = RIGHT;
 
-    Set_Speed(-0.4, distance_right);
+    osDelay(time_ms);
 
-    osDelay(800);
+    motion.flagTurn = LEFT;
 
-    Set_Speed(0, distance_right);
+    osDelay(time_ms);
 
-    Light_Mode(DARK_ALL);
-    Light_Mode(PREPARED);
+    // 回复直线行驶
+    motion.flagTurn = STRAIGHT;
+}
+
+void Turn_Left(int time_ms)
+{
+    // 转向右车道
+    motion.flagTurn = LEFT;
+
+    osDelay(time_ms);
+
+    motion.flagTurn = RIGHT;
+
+    osDelay(time_ms);
+
+    // 回复直线行驶
+    motion.flagTurn = STRAIGHT;
 }

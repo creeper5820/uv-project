@@ -20,9 +20,6 @@ void Utility_Get_Data_OpenCV(char* data, Data_OpenCV* opencv)
 
     Utility_Next(&position);
     opencv->flag_stop = atoi(position);
-
-    Utility_Next(&position);
-    opencv->flag_offset = atoi(position);
 }
 
 void Utility_Get_Data_System(char* data, Data_System* system)
@@ -87,11 +84,10 @@ void Show_Data_OpenCV(Data_OpenCV data, Serial_Transceiver serial)
 {
     char send[50];
 
-    sprintf(send, "%d, %d, %d, %d\n",
+    sprintf(send, "%d, %d, %d\n",
         data.flag_turn,
         data.flag_slow,
-        data.flag_stop,
-        data.flag_offset);
+        data.flag_stop);
 
     serial.Send((char*)send, strlen(send));
 

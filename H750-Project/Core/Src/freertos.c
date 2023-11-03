@@ -80,21 +80,21 @@ osThreadId_t TofHandle;
 const osThreadAttr_t Tof_attributes = {
   .name = "Tof",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for Lisii */
 osThreadId_t LisiiHandle;
 const osThreadAttr_t Lisii_attributes = {
   .name = "Lisii",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 /* Definitions for Margin */
 osThreadId_t MarginHandle;
 const osThreadAttr_t Margin_attributes = {
   .name = "Margin",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal,
+  .priority = (osPriority_t) osPriorityAboveNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/

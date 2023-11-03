@@ -14,7 +14,6 @@ struct Data_OpenCV {
     int flag_turn;
     int flag_slow;
     int flag_stop;
-    int flag_offset;
 };
 
 /*****************

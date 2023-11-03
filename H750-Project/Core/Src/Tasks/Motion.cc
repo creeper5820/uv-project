@@ -22,6 +22,8 @@ extern QueueHandle_t Queue_Margin;
 
 extern Serial_Transceiver lisii;
 
+auto motion = Motion_Controller();
+
 void Motion_Loop()
 {
     static Data_System data_system{ 0, 0, 0, 0, 0, 0, 0, 0, 0 };
@@ -47,7 +49,7 @@ void Motion_Loop()
     data_motion.speed = 0;
     data_motion.distance = 40;
 
-    auto motion = Motion_Controller(&data_system);
+    motion.Load_System(&data_system);
 
     motion.Init();
 

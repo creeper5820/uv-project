@@ -5,17 +5,18 @@
 #include "string.h"
 
 #include "../Application/Serial_Transceiver.hh"
+#include "../Application/Motion_Controller.hh"
 #include "../Basic/Message_Type.hh"
 #include "../Utility/Utility.hh"
 
 #define flag_debug 1
-#define flag_wait_pi 0
+#define flag_wait_pi 1
 #define flag_begin 1
 
-#define distance_right 30
-#define distance_left 18
+#define distance_right 50
+#define distance_left 20
 
-static int model = TASK_A;
+static int model = MODEL_DEBUG;
 
 // Override the function
 extern "C" {
@@ -31,11 +32,8 @@ void Model_Debug();
 
 void Set_Speed(float speed, float direction);
 void Light_Mode(int mode);
-void Light_Task(int task);
+void Turn_Right(int time_ms);
+void Turn_Left(int time_ms);
 
-void Turn_Left(float speed, float direction);
-void Turn_Right(float speed, float direction);
-void Straight(float speed);
-void Brake();
 void Scan_Block_Next(int distance);
 void Scan_Block_Stop(int distance);

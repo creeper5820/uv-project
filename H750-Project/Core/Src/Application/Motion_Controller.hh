@@ -27,8 +27,9 @@ public:
     int bias_balance_last_ = 0;
     int bias_balance_integral_ = 0;
 
-    int bias_distance_ = 0;
-    int bias_distance_last = 0;
+    float bias_distance_ = 0;
+    float bias_distance_integral_ = 0;
+    float bias_distance_last = 0;
 
     int distance_a_last_ = 0;
     int distance_b_last_ = 0;
@@ -41,6 +42,8 @@ public:
 
     float speed_current_ = 0;
     float direction_current_ = 0;
+
+    int flagTurn = 0;
 
 public:
     Motion_Controller()
@@ -121,35 +124,48 @@ public:
     // ensure pwm is limited under 500, or your car will fly
     void Set_Motor_Pwm(int pwm)
     {
-        Set_Pwm(pwm, pwm);
+        Set_Pwm(pwm, pwm * 1.5);
     }
 
     // 780 is mid
     void Set_Servo_Duty(uint16_t duty)
     {
-        Servo_Control(duty);
+        switch (flagTurn) {
+        case 0:
+            Servo_Control(duty);
+            break;
+        case 1: //左转
+            Servo_Control(825);
+            break;
+        case 2: //右转
+            Servo_Control(725);
+            break;
+        }
+
+        // Servo_Control(775);
     }
 
     void Set_Speed(float speed)
     {
-        if (!system_.model_pid) {
+        // if (!system_.model_pid) {
 
-            pwm_speed_ = speed * PWM_limit;
-        }
-        else {
-            speed_current_ = Read_Speed(1);
-            bias_ = speed - speed_current_;
+        pwm_speed_ = speed * PWM_limit;
 
-            pwm_speed_
-                = (float)system_.factor_p_m * bias_
-                + (float)system_.factor_i_m * bias_integral_
-                + (float)system_.factor_d_m * (bias_ - bias_last_);
+        // }
+        // else {
+        //     speed_current_ = Read_Speed(1);
+        //     bias_ = speed - speed_current_;
 
-            if (abs(bias_ - bias_last_) > 0.01)
-                bias_integral_ += bias_;
+        //     pwm_speed_
+        //         = (float)system_.factor_p_m * bias_
+        //         + (float)system_.factor_i_m * bias_integral_
+        //         + (float)system_.factor_d_m * (bias_ - bias_last_);
 
-            bias_last_ = bias_;
-        }
+        //     if (abs(bias_ - bias_last_) > 0.01)
+        //         bias_integral_ += bias_;
+
+        //     bias_last_ = bias_;
+        // }
 
         Set_Motor_Pwm(pwm_speed_);
     }
@@ -165,6 +181,7 @@ public:
             / (2 * sqrt(pow(9, 2) + pow(abs(margin_.margin_a - margin_.margin_b), 2)));
     }
 
+    // 舵机闭环控制
     void Set_Direction(int distance)
     {
         // margin_.margin_a;  测量值a
@@ -172,7 +189,7 @@ public:
 
         int distance_a = margin_.margin_a;
         int distance_b = margin_.margin_b;
-        int distance_true = Get_Distance();
+        float distance_true = Get_Distance();
 
         if (distance_a > 80)
             distance_a = 80;
@@ -183,25 +200,39 @@ public:
             distance_true = 80;
 
         if (distance_true > 80 || abs(distance_true - distance_last_) > 40)
-            distance_true = distance_last_;
+            distance_true = 80;
 
         bias_balance_ = distance_a - distance_b;
         bias_distance_ = distance_true - distance;
 
+        // bias_distance_integral_ += bias_distance_;
+
+        // int limit_intergal_distance = 100000;
+
+        // if(bias_distance_integral_ > limit_intergal_distance)
+        // {
+        //     bias_distance_integral_ = limit_intergal_distance;
+        // }
+        // if(bias_distance_integral_ < -limit_intergal_distance)
+        // {
+        //     bias_distance_integral_ = -limit_intergal_distance;
+        // }
+
         // 往左偏就是大了
         int pwm_mid = 775;
 
-        int limit_pwm_balance = 12;
-        int limit_pwm_distance = 10;
+        int limit_pwm_balance = 0;
+        int limit_pwm_distance = 50;
 
-        int pwm_balance_add
+        float pwm_balance_add
             = (float)20 * bias_balance_
             + (float)0 * bias_balance_ * 0.01
             + (float)0 * (bias_balance_ - bias_balance_last_);
 
-        int pwm_distance_add
-            = (float)1 * bias_distance_
-            + (float)0 * (bias_distance_ - bias_distance_last);
+        float pwm_distance_add
+            = (float)0.5 * bias_distance_
+            + (float)0 * bias_distance_integral_
+            + (float)10 * (bias_distance_ - bias_distance_last);
 
         if (pwm_balance_add > limit_pwm_balance)
             pwm_balance_add = limit_pwm_balance;
@@ -213,7 +244,7 @@ public:
         if (pwm_distance_add < -limit_pwm_distance)
             pwm_distance_add = -limit_pwm_distance;
 
-        pwm_distance_ = pwm_mid + pwm_distance_add + pwm_balance_add;
+        pwm_distance_ = (int)(pwm_mid + pwm_distance_add + pwm_balance_add);
 
         bias_balance_last_ = bias_balance_;
         bias_distance_last = bias_distance_;
