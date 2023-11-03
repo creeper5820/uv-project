@@ -136,12 +136,13 @@ void Begin()
  */
 void Task_A()
 {
+    float speed_task_a = 0.20;
+
     Set_Speed(0, distance_right);
 
     Light_Mode(TASK_A);
 
-    for (int i = 0; i < 5; i++)
-        Set_Speed(0.30, distance_right);
+    Set_Speed(speed_task_a, distance_right);
 
     // 无限阻塞以调试
     if (0)
@@ -158,7 +159,16 @@ void Task_A()
         lisii.Send((char*)"stop\n", sizeof("stop"));
 
     // 刹车
-    Brake();
+    Light_Mode(LIGHT_TAIL);
+
+    Set_Speed(-0.1, distance_right);
+
+    osDelay(500);
+
+    Set_Speed(0, distance_right);
+
+    Light_Mode(DARK_ALL);
+    Light_Mode(PREPARED);
 
     while (Button_Scan(Button_1_GPIO_Port, Button_1_Pin))
         ;
@@ -377,7 +387,7 @@ void Brake()
 
     Set_Speed(-0.4, distance_right);
 
-    osDelay(400);
+    osDelay(800);
 
     Set_Speed(0, distance_right);
 

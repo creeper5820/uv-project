@@ -63,6 +63,17 @@
           "target": "stm32h7x",
           "interface": "cmsis-dap",
           "baseAddr": "0x08000000"
+        },
+        "STLink": {
+          "bin": "",
+          "proType": "SWD",
+          "resetMode": "default",
+          "runAfterProgram": true,
+          "speed": "8000",
+          "address": "0x08000000",
+          "elFile": "None",
+          "optionBytes": ".eide/debug.st.option.bytes.ini",
+          "otherCmds": ""
         }
       },
       "custom_dep": {

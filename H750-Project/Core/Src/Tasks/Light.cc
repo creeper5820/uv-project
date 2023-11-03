@@ -10,7 +10,7 @@ void Light_Loop()
     leds.Add(Led_Controller(LED_4_GPIO_Port, LED_4_Pin));
 
     for (;;) {
-        xQueueReceive(Queue_Light, &data_light, 0);
+        xQueueReceive(Queue_Light, &data_light, portMAX_DELAY);
 
         switch (data_light.status) {
 

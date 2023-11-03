@@ -40,7 +40,7 @@ void Motion_Loop()
 
     data_system.encode_max = 5000;
     data_system.offset_max = 300;
-    data_system.model_pid = 0;
+    data_system.model_pid = 1;
 
     // M_0_0_E
 
@@ -67,7 +67,7 @@ void Motion_Loop()
         if (0) {
             char send[40];
             int size = sprintf(send, "speed: %.2f,%.2f\n",
-                motion.motion_.speed, motion.speed_current_);
+                motion.Read_Speed(0), motion.Read_Speed(1));
 
             lisii.Send(send, size);
         }
@@ -75,7 +75,7 @@ void Motion_Loop()
         if (0)
             Show_Data_System(motion.system_, lisii);
 
-        if (1)
+        if (0)
             Show_Data_Margin(data_margin, lisii);
 
         if (0) {

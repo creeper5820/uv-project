@@ -12,8 +12,8 @@
 #define flag_wait_pi 0
 #define flag_begin 1
 
-#define distance_right 60
-#define distance_left 20
+#define distance_right 30
+#define distance_left 18
 
 static int model = TASK_A;
 

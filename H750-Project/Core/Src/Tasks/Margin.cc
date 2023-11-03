@@ -13,7 +13,7 @@ void Margin_Loop();
 
 extern QueueHandle_t Queue_Margin;
 
-auto margin = Serial_Transceiver(&huart1);
+auto margin = Serial_Transceiver(&huart5);
 
 extern Serial_Transceiver lisii;
 
@@ -34,6 +34,6 @@ void Margin_Loop()
         if (0)
             Show_Data_Margin(data_margin, lisii);
 
-        osDelay(5);
+        osDelay(50);
     }
 }

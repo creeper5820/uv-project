@@ -23,17 +23,16 @@ public:
     float bias_integral_ = 0;
 
     // PID params if distance
-    int bias_distance_a_ = 0;
-    int bias_distance_last_a_ = 0;
-    int bias_distance_integral_a_ = 0;
-
-    int bias_distance_b_ = 0;
-    int bias_distance_last_b_ = 0;
-    int bias_distance_integral_b_ = 0;
+    int bias_balance_ = 0;
+    int bias_balance_last_ = 0;
+    int bias_balance_integral_ = 0;
 
     int bias_distance_ = 0;
-    int bias_distance_last_ = 0;
-    int bias_distance_integral_ = 0;
+    int bias_distance_last = 0;
+
+    int distance_a_last_ = 0;
+    int distance_b_last_ = 0;
+    int distance_last_ = 0;
 
     int model_direction = 1;
 
@@ -155,53 +154,11 @@ public:
         Set_Motor_Pwm(pwm_speed_);
     }
 
-    void Set_Direction_base(float distance)
-    {
-        // 读数据进行筛选
-        {
-            if (margin_.margin_a == 0 || margin_.margin_b == 0 || margin_.margin_a == 8888 || margin_.margin_b == 8888)
-                return;
-        }
-
-        // 保持距离的函数
-        int pwm_add_distance = 0;
-        int factor_distance = 1;
-        int limit_distance = 20;
-
-        bias_distance_ = Get_Distance() - motion_.distance;
-
-        pwm_add_distance = bias_distance_ * factor_distance;
-
-        if (pwm_add_distance > limit_distance)
-            pwm_add_distance = limit_distance;
-
-        if (pwm_add_distance < -limit_distance)
-            pwm_add_distance = -limit_distance;
-
-        // 保持平衡的函数
-        int pwm_add_balance = 0;
-        int factor_balance = 3;
-        int limit_balance = 30;
-
-        pwm_add_balance
-            = (margin_.margin_a - margin_.margin_b) * factor_balance;
-
-        if (pwm_add_balance > limit_balance)
-            pwm_add_balance = limit_balance;
-
-        if (pwm_add_balance < -limit_balance)
-            pwm_add_balance = -limit_balance;
-
-        pwm_distance_ = 780 + pwm_add_balance + pwm_add_distance;
-
-        Set_Servo_Duty(pwm_distance_);
-    }
-
     float Get_Distance()
     {
-        if (margin_.margin_a > 100)
+        if (margin_.margin_a > 80)
             margin_.margin_a = 80;
-        if (margin_.margin_b > 100)
+        if (margin_.margin_b > 80)
             margin_.margin_b = 80;
 
         return (9 * (margin_.margin_a + margin_.margin_b))
@@ -215,30 +172,55 @@ public:
 
         int distance_a = margin_.margin_a;
         int distance_b = margin_.margin_b;
-
-        int limit_pwm_distance = 50;
+        int distance_true = Get_Distance();
 
         if (distance_a > 80)
             distance_a = 80;
         if (distance_b > 80)
             distance_b = 80;
 
-        bias_distance_ = distance_a - distance_b;
+        if (distance_true > 80)
+            distance_true = 80;
 
-        pwm_distance_
-            = 780
-            + (float)system_.factor_p_s * bias_distance_
-            + (float)system_.factor_i_s * bias_distance_ * 0.01
-            + (float)system_.factor_d_s * (bias_distance_ - bias_distance_last_);
+        if (distance_true > 80 || abs(distance_true - distance_last_) > 40)
+            distance_true = distance_last_;
 
-        pwm_distance_ += (distance - Get_Distance()) / 2;
+        bias_balance_ = distance_a - distance_b;
+        bias_distance_ = distance_true - distance;
 
-        if (pwm_distance_ > 780 + limit_pwm_distance)
-            pwm_distance_ = 780 + limit_pwm_distance;
-        if (pwm_distance_ < 780 - limit_pwm_distance)
-            pwm_distance_ = 780 - limit_pwm_distance;
+        // 往左偏就是大了
+        int pwm_mid = 775;
 
-        bias_distance_last_ = bias_distance_;
+        int limit_pwm_balance = 12;
+        int limit_pwm_distance = 10;
+
+        int pwm_balance_add
+            = (float)20 * bias_balance_
+            + (float)0 * bias_balance_ * 0.01
+            + (float)0 * (bias_balance_ - bias_balance_last_);
+
+        int pwm_distance_add
+            = (float)1 * bias_distance_
+            + (float)0 * (bias_distance_ - bias_distance_last);
+
+        if (pwm_balance_add > limit_pwm_balance)
+            pwm_balance_add = limit_pwm_balance;
+        if (pwm_balance_add < -limit_pwm_balance)
+            pwm_balance_add = -limit_pwm_balance;
+
+        if (pwm_distance_add > limit_pwm_distance)
+            pwm_distance_add = limit_pwm_distance;
+        if (pwm_distance_add < -limit_pwm_distance)
+            pwm_distance_add = -limit_pwm_distance;
+
+        pwm_distance_ = pwm_mid + pwm_distance_add + pwm_balance_add;
+
+        bias_balance_last_ = bias_balance_;
+        bias_distance_last = bias_distance_;
+
+        distance_a_last_ = distance_a;
+        distance_b_last_ = distance_b;
+        distance_last_ = distance_true;
 
         Set_Servo_Duty(pwm_distance_);
     }

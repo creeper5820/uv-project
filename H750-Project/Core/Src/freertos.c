@@ -59,7 +59,7 @@ osThreadId_t MessagerHandle;
 const osThreadAttr_t Messager_attributes = {
   .name = "Messager",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityHigh,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for Motion */
 osThreadId_t MotionHandle;
@@ -80,21 +80,21 @@ osThreadId_t TofHandle;
 const osThreadAttr_t Tof_attributes = {
   .name = "Tof",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal2,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for Lisii */
 osThreadId_t LisiiHandle;
 const osThreadAttr_t Lisii_attributes = {
   .name = "Lisii",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal2,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 /* Definitions for Margin */
 osThreadId_t MarginHandle;
 const osThreadAttr_t Margin_attributes = {
   .name = "Margin",
   .stack_size = 128 * 4,
-  .priority = (osPriority_t) osPriorityNormal2,
+  .priority = (osPriority_t) osPriorityNormal,
 };
 
 /* Private function prototypes -----------------------------------------------*/

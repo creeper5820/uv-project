@@ -17,7 +17,7 @@ extern QueueHandle_t Queue_Tof;
 extern QueueHandle_t Queue_Motion;
 
 // Serial port initiallize
-auto lisii = Serial_Transceiver(&huart5);
+auto lisii = Serial_Transceiver(&huart1);
 
 void Lisii_Loop()
 {
@@ -41,7 +41,7 @@ void Lisii_Loop()
                 Utility_Get_Data_OpenCV(lisii.Get_Data(), &data_opencv_temp);
 
                 // send message to main handler "Messager"
-                xQueueSend(Queue_Opencv, &data_opencv_temp, 5);
+                xQueueOverwrite(Queue_Opencv, &data_opencv_temp);
 
                 break;
 
@@ -53,17 +53,17 @@ void Lisii_Loop()
 
             case 'S':
                 Utility_Get_Data_System(lisii.Get_Data(), &data_system_temp);
-                xQueueSend(Queue_System, &data_system_temp, 5);
+                xQueueOverwrite(Queue_System, &data_system_temp);
                 break;
 
             case 'T':
-                xQueueReceive(Queue_Tof, &data_tof_temp, 100);
+                xQueueReceive(Queue_Tof, &data_tof_temp, portMAX_DELAY);
                 Show_Data_Tof(data_tof_temp, lisii);
                 break;
 
             case 'M':
                 Utility_Get_Data_Motion(lisii.Get_Data(), &data_motion_temp);
-                xQueueSend(Queue_Motion, &data_motion_temp, 100);
+                xQueueOverwrite(Queue_Motion, &data_motion_temp);
                 break;
 
             default:
