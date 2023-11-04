@@ -42,7 +42,7 @@ void Motion_Loop()
 
     data_system.encode_max = 5000;
     data_system.offset_max = 300;
-    data_system.model_pid = 1;
+    data_system.model_pid = 0;
 
     // M_0_0_E
 

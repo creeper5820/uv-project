@@ -4,6 +4,7 @@
 #include "stdio.h"
 
 #include "../Application/Serial_Transceiver.hh"
+#include "../Application/Motion_Controller.hh"
 #include "../Utility/Utility.hh"
 #include "../Basic/Message_Type.hh"
 
@@ -15,6 +16,7 @@ extern QueueHandle_t Queue_Margin;
 
 auto margin = Serial_Transceiver(&huart5);
 
+extern Motion_Controller motion;
 extern Serial_Transceiver lisii;
 
 static Data_Margin data_margin;
@@ -28,7 +30,8 @@ void Margin_Loop()
         if (margin.Get_Status() == OK) {
             margin.Set_Wait();
             Utility_Get_Data_Margin(margin.Get_Data(), &data_margin);
-            xQueueOverwrite(Queue_Margin, &data_margin);
+            motion.Load_Margin(&data_margin);
+            // xQueueOverwrite(Queue_Margin, &data_margin);
         }
 
         if (0)

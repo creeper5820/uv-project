@@ -55,6 +55,7 @@ void Messager_Loop()
 
 void Begin()
 {
+    Light_Mode(DARK_ALL);
     Light_Mode(model);
 
     // 按键消抖
@@ -143,7 +144,7 @@ void Begin()
  */
 void Task_A()
 {
-    float speed_task_a = 0.25;
+    float speed_task_a = 0.2;
 
     Set_Speed(0, distance_right);
 
@@ -160,7 +161,7 @@ void Task_A()
     osDelay(1000);
 
     // 检测到前方的墙后进行下一步
-    Scan_Block_Next(90);
+    Scan_Block_Next(150);
 
     if (flag_debug)
         lisii.Send((char*)"stop\n", sizeof("stop"));
@@ -168,9 +169,13 @@ void Task_A()
     // 刹车
     Light_Mode(LIGHT_TAIL);
 
-    Set_Speed(-0.1, distance_right);
+    Set_Speed(-0.4, distance_right);
 
     osDelay(500);
+
+    Set_Speed(0.1, distance_right);
+
+    osDelay(100);
 
     Set_Speed(0, distance_right);
 
@@ -197,6 +202,7 @@ void Task_B()
     Scan_Block_Next(150);
 
     // 转向左车道
+    Light_Mode(LIGHT_LEFT);
     motion.flagTurn = LEFT;
 
     osDelay(400);
@@ -206,6 +212,7 @@ void Task_B()
     osDelay(400);
 
     // 回复直线行驶
+    Light_Mode(DARK_ALL);
     motion.flagTurn = STRAIGHT;
 
     Set_Speed(0.20, distance_left);
@@ -213,6 +220,7 @@ void Task_B()
     Scan_Block_Next(150);
 
     // 转向右车道
+    Light_Mode(LIGHT_RIGHT);
     motion.flagTurn = RIGHT;
 
     osDelay(400);
@@ -222,17 +230,42 @@ void Task_B()
     osDelay(400);
 
     // 回复直线行驶
+    Light_Mode(DARK_ALL);
     motion.flagTurn = STRAIGHT;
 
-    Set_Speed(0.20, distance_left);
+    Set_Speed(0.20, distance_right);
 
-    Scan_Block_Next(100);
+    // 等待视觉检测菱形标
+    do {
+        xQueueReceive(Queue_Opencv, &data_opencv_temp, portMAX_DELAY);
+    } while (data_opencv_temp.flag_slow != 1);
+
+    // 减速
+    Light_Mode(LIGHT_TAIL);
+    Set_Speed(0.15, distance_right);
+
+    // 等待视觉检测斑马线
+    do {
+        xQueueReceive(Queue_Opencv, &data_opencv_temp, portMAX_DELAY);
+    } while (data_opencv_temp.flag_stop != 1);
 
     // 刹车
+    Light_Mode(LIGHT_TAIL);
     Set_Speed(-0.4, distance_left);
 
     osDelay(400);
 
+    Set_Speed(0, distance_left);
+
+    //
+
+    // 刹车
+    Light_Mode(LIGHT_TAIL);
+    Set_Speed(-0.4, distance_left);
+
+    osDelay(400);
+
+    Light_Mode(DARK_ALL);
     Set_Speed(0, distance_left);
 
     while (Button_Scan(Button_1_GPIO_Port, Button_1_Pin))
@@ -246,7 +279,9 @@ void Task_C()
 {
     // 直线行驶
     motion.flagTurn = STRAIGHT;
-    Set_Speed(0.25, distance_right);
+    Set_Speed(0.28, distance_right);
+
+    osDelay(800);
 
     // 遇到前方红色车
     do {
@@ -254,45 +289,57 @@ void Task_C()
         osDelay(20);
     } while (data_opencv_temp.flag_turn != 1);
 
+    // Scan_Block_Next(100);
+
     // 向左转向
-    Turn_Left(400);
+    Light_Mode(LIGHT_LEFT);
+    Turn_Left(490);
 
     // 直线行驶
+    Light_Mode(DARK_ALL);
     motion.flagTurn = STRAIGHT;
-    Set_Speed(0.25, distance_left);
+    Set_Speed(0.20, distance_left);
 
     // 等超过红色车辆
-    osDelay(1000);
+    osDelay(3000);
 
     // 转向右车道
-    Turn_Right(400);
+    Light_Mode(LIGHT_RIGHT);
+    Turn_Right(580); //400
 
     // 直线行驶
+    Light_Mode(DARK_ALL);
     motion.flagTurn = STRAIGHT;
     Set_Speed(0.25, distance_right);
 
+    osDelay(1500);
+
+    Light_Mode(FLASH_THREE);
+
     // 测距距离突然变小,检测到左方车辆
-    while (motion.bias_balance_ > -20)
+    while (abs(motion.bias_balance_ - motion.bias_balance_last_) > 15)
         ;
 
-    // 测距距离突然变大,检测到回车结束
-    while (motion.bias_balance_ < 20)
-        ;
+    osDelay(1000);
 
     // 向左转向
-    Turn_Left(400);
+    Light_Mode(LIGHT_LEFT);
+    Turn_Left(360); //340
 
     // 直线行驶
+    Light_Mode(DARK_ALL);
     motion.flagTurn = STRAIGHT;
     Set_Speed(0.25, distance_left);
 
-    Scan_Block_Next(100);
+    Scan_Block_Next(150);
 
     // 刹车
+    Light_Mode(LIGHT_TAIL);
     Set_Speed(-0.4, distance_left);
 
-    osDelay(400);
+    osDelay(450);
 
+    Light_Mode(DARK_ALL);
     Set_Speed(0, distance_left);
 
     while (Button_Scan(Button_1_GPIO_Port, Button_1_Pin))
@@ -412,7 +459,7 @@ void Turn_Right(int time_ms)
 
     motion.flagTurn = LEFT;
 
-    osDelay(time_ms);
+    osDelay(time_ms + 40);
 
     // 回复直线行驶
     motion.flagTurn = STRAIGHT;
@@ -427,7 +474,7 @@ void Turn_Left(int time_ms)
 
     motion.flagTurn = RIGHT;
 
-    osDelay(time_ms);
+    osDelay(time_ms + 60);
 
     // 回复直线行驶
     motion.flagTurn = STRAIGHT;

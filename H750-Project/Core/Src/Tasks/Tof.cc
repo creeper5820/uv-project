@@ -4,6 +4,7 @@
 #include "stdio.h"
 
 #include "../Application/Serial_Transceiver.hh"
+#include "../Application/Motion_Controller.hh"
 #include "../Utility/Utility.hh"
 #include "../Basic/Message_Type.hh"
 

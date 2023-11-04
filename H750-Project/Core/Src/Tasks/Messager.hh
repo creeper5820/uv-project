@@ -9,14 +9,14 @@
 #include "../Basic/Message_Type.hh"
 #include "../Utility/Utility.hh"
 
-#define flag_debug 1
+#define flag_debug 0
 #define flag_wait_pi 1
 #define flag_begin 1
 
-#define distance_right 50
-#define distance_left 20
+#define distance_right 65
+#define distance_left 23
 
-static int model = MODEL_DEBUG;
+static int model = TASK_A;
 
 // Override the function
 extern "C" {
