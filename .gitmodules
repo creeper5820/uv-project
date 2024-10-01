@@ -1,0 +1,3 @@
+[submodule "src/hal"]
+	path = src/hal
+	url = git@github.com:creeper5820/stm32_hal.git
