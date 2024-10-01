@@ -46,7 +46,7 @@ public:
         pid_.kd = kd;
     }
 
-    void update_speed(float speed) { speed_scan_ = speed; }
+    void update_speed(float speed) { speed_scan_ = util::limit(speed, -0.999f, +0.999f); }
 
     float speed() const { return speed_scan_; }
 
