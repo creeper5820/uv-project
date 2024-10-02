@@ -3,14 +3,19 @@
 #include "hal/base/encoder.hh"
 #include "hal/base/gpio.hh"
 #include "hal/base/pwm.hh"
+#include "hal/base/serial.hh"
 #include "hal/base/timer.hh"
 
 #include "device/motor/motor.hh"
+
 #include "motion.hh"
 
-#include "tim.h"
-
 #include <cstdint>
+
+#include "tim.h"
+#include "usart.h"
+
+constexpr uint16_t encoder_count_limit = 3100;
 
 namespace single {
 using namespace hal;
@@ -45,6 +50,9 @@ inline Encoder<&htim5> encoder3 {};
 using led = gpio::PE<3>;
 
 inline Timer<&htim17> timer17 {};
-}
 
-constexpr uint16_t encoder_count_limit = 3100;
+inline Serial remote { &huart1 };
+
+inline Motion motion { motor3, motor2, motor1, motor0 };
+
+}

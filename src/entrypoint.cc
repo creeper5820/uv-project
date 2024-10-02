@@ -1,9 +1,7 @@
 #include "entrypoint.hh"
+#include "hal/base/timer.hh"
 #include "motion.hh"
 #include "singleton.hh"
-
-#include "hal/base/timer.hh"
-#include "utility/math.hh"
 
 #include <cassert>
 #include <cstdint>
@@ -16,7 +14,9 @@ float speed[4];
 util::Vector2f velocity;
 float rotation;
 
-Motion motion { motor3, motor2, motor1, motor0 };
+uint8_t receive[20];
+
+void mission0();
 
 void entrypoint() {
     motor0.setup<pin_a0, pin_a1, pwm_a>();
@@ -34,24 +34,25 @@ void entrypoint() {
     motor2.set_pid(0.7, 0.1, 0);
     motor3.set_pid(0.7, 0.1, 0);
 
+    // remote.receive_idle<Serial::Mode::IT>(receive, sizeof(receive));
+
+    // remote.set_callback([](UART_HandleTypeDef* huart, uint16_t size) {
+    //     remote.receive_idle<Serial::Mode::IT>(receive, sizeof(receive));
+    // });
+
     timer17.register_activity(1000, []() {
         led::toggle();
     });
 
-    timer17.register_activity(1, []() {
+    timer17.register_activity(10, []() {
         motion.move(velocity, rotation);
     });
 
-    timer17.register_activity(1, []() {
+    timer17.register_activity(10, []() {
         const int32_t interval[4] {
             encoder0.interval() * 500 / 13, encoder1.interval() * 500 / 13,
             encoder2.interval(), encoder3.interval()
         };
-
-        assert(interval[0] < 5000 && interval[0] > -5000);
-        assert(interval[1] < 5000 && interval[1] > -5000);
-        assert(interval[2] < 5000 && interval[2] > -5000);
-        assert(interval[3] < 5000 && interval[3] > -5000);
 
         motor0.update_speed(
             static_cast<float>(interval[0]) / encoder_count_limit);
@@ -71,6 +72,31 @@ void entrypoint() {
     timer17.start();
 
     while (true) {
-        time::delay(100);
+        mission0();
     }
+}
+
+void mission0() {
+    time::delay(2000);
+
+    velocity = { 0.2, 0 };
+    time::delay(2000);
+
+    velocity = { 0.2, 0.2 };
+    time::delay(2000);
+
+    velocity = { 0, 0 };
+    time::delay(2000);
+
+    velocity = { 0, 0 };
+    rotation = 0.1;
+    time::delay(1000);
+
+    velocity = { 0.1, -0.2 };
+    rotation = 0;
+    time::delay(2000);
+
+    velocity = { 0, 0 };
+    while (true)
+        ;
 }
