@@ -8,7 +8,7 @@
 
 #include "device/motor/motor.hh"
 
-#include "motion.hh"
+#include "device/motor/motion.hh"
 
 #include <cstdint>
 

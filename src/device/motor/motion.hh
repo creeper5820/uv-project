@@ -15,10 +15,10 @@ public:
 
     // r: rad/s
     void move(const util::Vector2f& v, float w) {
-        float output0 = v.x - v.y + w * (rx + ry); // left front
-        float output1 = v.x + v.y - w * (rx + ry); // right front
-        float output2 = v.x + v.y + w * (rx + ry); // left back
-        float output3 = v.x - v.y - w * (rx + ry); // right back
+        float output0 = v.x - v.y - w * (rx + ry); // left front
+        float output1 = v.x + v.y + w * (rx + ry); // right front
+        float output2 = v.x + v.y - w * (rx + ry); // left back
+        float output3 = v.x - v.y + w * (rx + ry); // right back
 
         motor_left_front_.rotate_closed_loop(output0);
         motor_right_front_.rotate_closed_loop(output1);

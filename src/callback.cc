@@ -1,7 +1,4 @@
 #include "singleton.hh"
-#include "stm32h7xx_hal_uart.h"
-#include "tim.h"
-#include "usart.h"
 
 using namespace hal;
 using namespace single;
