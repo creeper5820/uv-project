@@ -33,7 +33,7 @@ public:
                 _pwm::set_ratio(-speed_);
             }
         };
-        _pwm::template start<pwm::normal>();
+        _pwm::template start<Mode::Normal>();
         _gpioa::reset();
         _gpiob::reset();
     }
@@ -46,7 +46,7 @@ public:
         pid_.kd = kd;
     }
 
-    void update_speed(float speed) { speed_scan_ = util::limit(speed, -0.999f, +0.999f); }
+    void update_speed(float speed) { speed_scan_ = util::limit(speed, -1.f, +1.f); }
 
     float speed() const { return speed_scan_; }
 

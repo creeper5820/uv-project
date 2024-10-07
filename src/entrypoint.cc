@@ -1,4 +1,5 @@
 #include "entrypoint.hh"
+#include "hal/base/serial.hh"
 #include "protocol.hh"
 #include "singleton.hh"
 
@@ -38,8 +39,10 @@ void apply_motion() {
 
 void update_status() {
     const int32_t interval[4] {
-        encoder0.interval() * 500 / 13, encoder1.interval() * 500 / 13,
-        encoder2.interval(), encoder3.interval()
+        encoder0.interval() * 500 / 13,
+        encoder1.interval() * 500 / 13,
+        encoder2.interval(),
+        encoder3.interval()
     };
 
     motor0.update_speed(
@@ -58,7 +61,7 @@ void update_status() {
 }
 
 void serial_callback(UART_HandleTypeDef*, uint16_t) {
-    remote.receive_idle<Serial::Mode::IT>(
+    remote.receive_idle<Mode::It>(
         global::receive, sizeof(global::receive));
 
     global::watchdog_tick = 0;
@@ -112,8 +115,8 @@ void entrypoint() {
     motor2.set_pid(0.7, 0.1, 0);
     motor3.set_pid(0.7, 0.1, 0);
 
-    remote.receive_idle<Serial::Mode::IT>(
-        global::receive, sizeof(global::receive));
+    auto& receive = global::receive;
+    remote.receive_idle<Mode::It>(receive);
     remote.set_callback(&mission::serial_callback);
 
     timer17.register_activity(1000, &mission::toggle_led);

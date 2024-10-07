@@ -51,7 +51,7 @@ using led = gpio::PE<3>;
 
 inline Timer<&htim17> timer17 {};
 
-inline Serial remote { &huart1 };
+inline Serial<&huart1> remote {};
 
 inline Motion motion { motor3, motor2, motor1, motor0 };
 
