@@ -4,24 +4,25 @@ OpenDocument="main.c", FilePath="/home/creeper/workspace/embedded/uv-project/hal
 OpenDocument="singleton.hh", FilePath="/home/creeper/workspace/embedded/uv-project/src/singleton.hh", Line=28
 OpenDocument="timer.hh", FilePath="/home/creeper/workspace/embedded/uv-project/src/hal/base/timer.hh", Line=8
 OpenDocument="callback.cc", FilePath="/home/creeper/workspace/embedded/uv-project/src/callback.cc", Line=0
-OpenDocument="entrypoint.cc", FilePath="/home/creeper/workspace/embedded/uv-project/src/entrypoint.cc", Line=51
+OpenDocument="entrypoint.cc", FilePath="/home/creeper/workspace/embedded/uv-project/src/entrypoint.cc", Line=0
 OpenToolbar="Debug", Floating=0, x=0, y=0
 OpenWindow="Source Files", DockArea=BOTTOM, x=1, y=0, w=315, h=276, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
-OpenWindow="Watched Data 1", DockArea=LEFT, x=0, y=0, w=347, h=662, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
+OpenWindow="Watched Data 1", DockArea=LEFT, x=0, y=0, w=347, h=705, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 OpenWindow="Data Sampling", DockArea=BOTTOM, x=2, y=0, w=926, h=276, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0, VisibleTab=0, UniformSampleSpacing=0
-OpenWindow="Timeline", DockArea=RIGHT, x=0, y=0, w=590, h=662, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, DataPaneShown=1, PowerPaneShown=0, CodePaneShown=0, PinCursor="Cursor Movable", TimePerDiv="1 s", TimeStampFormat="Time", DataGraphDrawAsPoints=0, DataGraphLegendShown=1, DataGraphUniformSampleSpacing=0, DataGraphLegendPosition="0;315", DataGraphShowNamesAtCursor=0, PowerGraphDrawAsPoints=0, PowerGraphLegendShown=0, PowerGraphAvgFilterTime=Off, PowerGraphAvgFilterLen=Off, PowerGraphUniformSampleSpacing=0, PowerGraphLegendPosition="339;-99", CodeGraphLegendShown=0, CodeGraphLegendPosition="358;0"
+OpenWindow="Timeline", DockArea=RIGHT, x=0, y=0, w=835, h=705, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=1, DataPaneShown=1, PowerPaneShown=0, CodePaneShown=0, PinCursor="Cursor Movable", TimePerDiv="1 s", TimeStampFormat="Time", DataGraphDrawAsPoints=0, DataGraphLegendShown=1, DataGraphUniformSampleSpacing=0, DataGraphLegendPosition="0;315", DataGraphShowNamesAtCursor=0, PowerGraphDrawAsPoints=0, PowerGraphLegendShown=0, PowerGraphAvgFilterTime=Off, PowerGraphAvgFilterLen=Off, PowerGraphUniformSampleSpacing=0, PowerGraphLegendPosition="344;-83", CodeGraphLegendShown=0, CodeGraphLegendPosition="380;0"
 OpenWindow="Console", DockArea=BOTTOM, x=0, y=0, w=655, h=276, FilterBarShown=0, TotalValueBarShown=0, ToolBarShown=0
 SmartViewPlugin="", Page="", Toolbar="Hidden", Window="SmartView 1"
-TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[232;94;57;55;986]
+TableHeader="Source Files", SortCol="File", SortOrder="ASCENDING", VisibleCols=["File";"Status";"Size";"#Insts";"Path"], ColWidths=[232;94;57;55;1094]
 TableHeader="Data Sampling Table", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time"], ColWidths=[100;100]
-TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[111;100;100;100;100;100;107;123;126]
+TableHeader="Data Sampling Setup", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Type";"Value";"Min";"Max";"Average";"# Changes";"Min. Change";"Max. Change"], ColWidths=[111;100;100;100;100;100;119;132;137]
 TableHeader="Power Sampling", SortCol="None", SortOrder="ASCENDING", VisibleCols=["Index";"Time";"Ch 0"], ColWidths=[100;100;100]
 TableHeader="Watched Data 1", SortCol="Expression", SortOrder="ASCENDING", VisibleCols=["Expression";"Value";"Location";"Refresh";"Access"], ColWidths=[158;144;100;100;100]
 TableHeader="RegisterSelectionDialog", SortCol="None", SortOrder="ASCENDING", VisibleCols=[], ColWidths=[]
-TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[26;26;26;55]
+TableHeader="TargetExceptionDialog", SortCol="Name", SortOrder="ASCENDING", VisibleCols=["Name";"Value";"Address";"Description"], ColWidths=[26;26;26;36]
 WatchedExpression="entrypoint.cc::speed", RefreshRate=5, Window=Watched Data 1
 WatchedExpression="velocity", RefreshRate=5, Window=Watched Data 1
 WatchedExpression="rotation", Window=Watched Data 1
 WatchedExpression="callback.cc::receive", RefreshRate=5, Window=Watched Data 1
 WatchedExpression="dr16", RefreshRate=5, Window=Watched Data 1
 WatchedExpression="receive", RefreshRate=5, Window=Watched Data 1
+WatchedExpression="global::speed", RefreshRate=5, Window=Watched Data 1

@@ -1,9 +1,9 @@
 #include "entrypoint.hh"
-#include "hal/base/serial.hh"
 #include "protocol.hh"
 #include "singleton.hh"
 
 #include "device/motor/motion.hh"
+#include "hal/base/serial.hh"
 #include "hal/base/timer.hh"
 
 #include <cassert>
@@ -13,9 +13,9 @@ using namespace hal;
 using namespace single;
 
 namespace global {
+float rotation { 0 };
 float speed[4] { 0, 0, 0, 0 };
 util::Vector2f velocity { 0, 0 };
-float rotation { 0 };
 
 uint8_t receive[20];
 pro::Command command;
@@ -23,10 +23,12 @@ pro::Command command;
 uint32_t watchdog_tick = 0;
 }
 
+GENERATE_UART_RX_EVENT_CALLBACK(remote)
+GENERATE_UART_RX_COMPLETE_CALLBACK(remote)
+GENERATE_TIM_PERIOD_ELAPSED_CALLBACK(timer17)
+
 namespace mission {
-void toggle_led() {
-    led::toggle();
-}
+void toggle_led() { led::toggle(); }
 
 void apply_motion() {
     if (global::watchdog_tick > 100) {
@@ -38,21 +40,13 @@ void apply_motion() {
 }
 
 void update_status() {
-    const int32_t interval[4] {
-        encoder0.interval() * 500 / 13,
-        encoder1.interval() * 500 / 13,
-        encoder2.interval(),
-        encoder3.interval()
-    };
+    const int32_t interval[4] { encoder0.interval() * 500 / 13, encoder1.interval() * 500 / 13,
+        encoder2.interval(), encoder3.interval() };
 
-    motor0.update_speed(
-        static_cast<float>(interval[0]) / encoder_count_limit);
-    motor1.update_speed(
-        static_cast<float>(interval[1]) / encoder_count_limit);
-    motor2.update_speed(
-        static_cast<float>(interval[2]) / encoder_count_limit);
-    motor3.update_speed(
-        static_cast<float>(interval[3]) / encoder_count_limit);
+    motor0.update_speed(static_cast<float>(interval[0]) / encoder_count_limit);
+    motor1.update_speed(static_cast<float>(interval[1]) / encoder_count_limit);
+    motor2.update_speed(static_cast<float>(interval[2]) / encoder_count_limit);
+    motor3.update_speed(static_cast<float>(interval[3]) / encoder_count_limit);
 
     global::speed[0] = motor0.speed();
     global::speed[1] = motor1.speed();
@@ -61,15 +55,13 @@ void update_status() {
 }
 
 void serial_callback(UART_HandleTypeDef*, uint16_t) {
-    remote.receive_idle<Mode::It>(
-        global::receive, sizeof(global::receive));
+    remote.receive_idle<Mode::It>(global::receive, sizeof(global::receive));
 
     global::watchdog_tick = 0;
     global::velocity = { 0, 0 };
     global::rotation = 0;
 
-    const auto command = reinterpret_cast<pro::Command*>(
-        global::receive);
+    const auto command = reinterpret_cast<pro::Command*>(global::receive);
     global::command = *command;
     if (command->header == 0xa5 && command->end == 0xb6) {
 
@@ -117,11 +109,11 @@ void entrypoint() {
 
     auto& receive = global::receive;
     remote.receive_idle<Mode::It>(receive);
-    remote.set_callback(&mission::serial_callback);
+    remote.set_callback(mission::serial_callback);
 
-    timer17.register_activity(1000, &mission::toggle_led);
-    timer17.register_activity(10, &mission::update_status);
-    timer17.register_activity(10, &mission::apply_motion);
+    timer17.register_activity(1000, mission::toggle_led);
+    timer17.register_activity(10, mission::update_status);
+    timer17.register_activity(10, mission::apply_motion);
     timer17.start();
 
     while (true) {

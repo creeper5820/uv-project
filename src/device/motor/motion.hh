@@ -20,10 +20,15 @@ public:
         float output2 = v.x + v.y - w * (rx + ry); // left back
         float output3 = v.x - v.y + w * (rx + ry); // right back
 
-        motor_left_front_.rotate_closed_loop(output0);
-        motor_right_front_.rotate_closed_loop(output1);
-        motor_left_back_.rotate_closed_loop(output2);
-        motor_right_back_.rotate_closed_loop(output3);
+        // motor_left_front_.rotate_closed_loop(output0);
+        // motor_right_front_.rotate_closed_loop(output1);
+        // motor_left_back_.rotate_closed_loop(output2);
+        // motor_right_back_.rotate_closed_loop(output3);
+
+        motor_left_front_.rotate_open_loop(output0);
+        motor_right_front_.rotate_open_loop(output1);
+        motor_left_back_.rotate_open_loop(output2);
+        motor_right_back_.rotate_open_loop(output3);
     }
 
 private:

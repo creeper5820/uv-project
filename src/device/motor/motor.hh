@@ -9,9 +9,9 @@
 namespace dev {
 
 template <typename T>
-concept gpio_concept = hal::gpio::gpio_concept<T>;
+concept gpio_concept = hal::gpio::GpioConcept<T>;
 template <typename T>
-concept pwm_concept = hal::pwm::pwm_concept<T>;
+concept pwm_concept = hal::pwm::PwmConcept<T>;
 
 class Motor {
 public:
